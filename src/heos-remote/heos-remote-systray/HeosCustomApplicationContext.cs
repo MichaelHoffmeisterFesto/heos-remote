@@ -10,6 +10,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace heos_remote_systray
 {
@@ -19,6 +20,8 @@ namespace heos_remote_systray
 
         private ContextMenuStrip contextMenu;
 
+        private FormInfo? formInfo = null;
+
         public HeosCustomApplicationContext()
         {
             // Initialize Tray Icon
@@ -26,16 +29,19 @@ namespace heos_remote_systray
             {
             };
             
-            contextMenu.Items.Add("Play", image: ByteToImage(Resources.heos_remote_play), 
+            contextMenu.Items.Add("Play", image: WinFormsUtils.ByteToImage(Resources.heos_remote_play), 
                 onClick: contextMenuItemHandler);
-            contextMenu.Items.Add("Pause", image: ByteToImage(Resources.heos_remote_pause),
+            contextMenu.Items.Add("Pause", image: WinFormsUtils.ByteToImage(Resources.heos_remote_pause),
                 onClick: contextMenuItemHandler);
             contextMenu.Items.Add(new ToolStripSeparator());
-            contextMenu.Items.Add("Fav 1", image: ByteToImage(Resources.heos_remote_fav1),
+            contextMenu.Items.Add("Fav 1", image: WinFormsUtils.ByteToImage(Resources.heos_remote_fav1),
                 onClick: contextMenuItemHandler);
-            contextMenu.Items.Add("Fav 2", image: ByteToImage(Resources.heos_remote_fav2),
+            contextMenu.Items.Add("Fav 2", image: WinFormsUtils.ByteToImage(Resources.heos_remote_fav2),
                 onClick: contextMenuItemHandler);
-            contextMenu.Items.Add("Fav 3", image: ByteToImage(Resources.heos_remote_fav3),
+            contextMenu.Items.Add("Fav 3", image: WinFormsUtils.ByteToImage(Resources.heos_remote_fav3),
+                onClick: contextMenuItemHandler);
+            contextMenu.Items.Add(new ToolStripSeparator());
+            contextMenu.Items.Add("Info", image: null,
                 onClick: contextMenuItemHandler);
             contextMenu.Items.Add(new ToolStripSeparator());
             contextMenu.Items.Add("Exit", image: null, 
@@ -43,16 +49,26 @@ namespace heos_remote_systray
 
             trayIcon = new NotifyIcon()
             {
-                Icon = BytesToIcon(Resources.heos_remote_icon_I5p_icon),
+                Icon = WinFormsUtils.BytesToIcon(Resources.heos_remote_icon_I5p_icon),
                 Visible = true,
-                ContextMenuStrip = contextMenu
+                ContextMenuStrip = contextMenu,
             };
+
+            trayIcon.DoubleClick += new System.EventHandler(trayIcon_DoubleClick);
         }
 
         void contextMenuItemHandler(object? sender, EventArgs e)
         {
             if (sender is ToolStripMenuItem tsmi)
             {
+                if (tsmi.Text == "Info")
+                {
+                    if (formInfo == null)
+                        formInfo = new FormInfo();
+                    formInfo.Show();
+                    formInfo.FormClosed += new FormClosedEventHandler(formInfoClosedEventHandler);
+                }
+
                 if (tsmi.Text == "Exit")
                 {
                     // Hide tray icon, otherwise it will remain shown until user mouses over it
@@ -63,31 +79,15 @@ namespace heos_remote_systray
             }
         }
 
-        public static byte[] IconToBytes(Icon icon)
+        void trayIcon_DoubleClick(object? sender, EventArgs e)
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                icon.Save(ms);
-                return ms.ToArray();
-            }
+            ;
         }
 
-        public static Icon BytesToIcon(byte[] bytes)
+        void formInfoClosedEventHandler(object? sender, EventArgs e)
         {
-            using (MemoryStream ms = new MemoryStream(bytes))
-            {
-                return new Icon(ms);
-            }
+            formInfo = null;
         }
 
-        public static Bitmap ByteToImage(byte[] blob)
-        {
-            MemoryStream mStream = new MemoryStream();
-            byte[] pData = blob;
-            mStream.Write(pData, 0, Convert.ToInt32(pData.Length));
-            Bitmap bm = new Bitmap(mStream, false);
-            mStream.Dispose();
-            return bm;
-        }
     }
 }
