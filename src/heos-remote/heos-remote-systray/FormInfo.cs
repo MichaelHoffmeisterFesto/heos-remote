@@ -1,4 +1,5 @@
-﻿using System;
+﻿using heos_remote_lib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,9 @@ namespace heos_remote_systray
     {
         private System.Windows.Forms.TreeView treeXml = new TreeView();
 
-        public FormInfo()
+        public FormInfo(
+            HeosDiscoveredItem? devInfo = null,
+            List<Tuple<string, string>>? nowPlay = null)
         {
             // customise this window
             this.Text = "Information on active HEOS device";
@@ -29,8 +32,32 @@ namespace heos_remote_systray
             XmlDocument doc = new XmlDocument();
             try
             {
-                doc.LoadXml("<books><A property='a'><B>text</B><C>textg</C><D>99999</D></A></books>");
+                //doc.LoadXml("<books><A property='a'><B>text</B><C>textg</C><D>99999</D></A></books>");
                 //doc.Load("");
+
+
+                if (devInfo != null)
+                {
+                    // add some direct info
+                    var din = treeXml.Nodes.Add("#device");
+                    din.Nodes.Add($"FriendlyName: {devInfo.FriendlyName}");
+                    din.Nodes.Add($"Host: {devInfo.Host}");
+                    din.Nodes.Add($"Location: {devInfo.Location}");
+                    din.Nodes.Add($"Manufacturer: {devInfo.Manufacturer}");
+
+                    // now playing?
+                    if (nowPlay != null && nowPlay.Count > 0)
+                    {
+                        var npn = treeXml.Nodes.Add("#now-playing");
+                        foreach (var np in nowPlay)
+                            npn.Nodes.Add($"{np.Item1}: {np.Item2}");
+                    }
+
+                    // prepare later add of xml nodes
+                    doc.LoadXml(devInfo.XmlDescription);
+                }
+                else
+                    doc.Load("");
             }
             catch (Exception err)
             {
@@ -38,8 +65,13 @@ namespace heos_remote_systray
                 return;
             }
 
+            // now add all xml
             ConvertXmlNodeToTreeNode(doc, treeXml.Nodes);
-            treeXml.Nodes[0].ExpandAll();
+
+            // and expand
+            foreach (var n in treeXml.Nodes)
+                if (n is TreeNode tn)
+                    tn.ExpandAll();
         }
 
         private void ConvertXmlNodeToTreeNode(XmlNode xmlNode,

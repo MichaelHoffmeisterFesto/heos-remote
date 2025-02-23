@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "heos-remote-ctl", "heos-rem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "heos-remote-systray", "heos-remote-systray\heos-remote-systray.csproj", "{A3E9C060-C0D8-4142-859D-B424E7F516A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "heos-remote-lib", "heos-remote-lib\heos-remote-lib.csproj", "{C4EFDCD4-A3B7-4590-BE4C-6B62F7572D82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A3E9C060-C0D8-4142-859D-B424E7F516A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3E9C060-C0D8-4142-859D-B424E7F516A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3E9C060-C0D8-4142-859D-B424E7F516A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4EFDCD4-A3B7-4590-BE4C-6B62F7572D82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4EFDCD4-A3B7-4590-BE4C-6B62F7572D82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4EFDCD4-A3B7-4590-BE4C-6B62F7572D82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4EFDCD4-A3B7-4590-BE4C-6B62F7572D82}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

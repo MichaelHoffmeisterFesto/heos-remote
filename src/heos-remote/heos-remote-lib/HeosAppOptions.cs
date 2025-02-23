@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 
-namespace heos_remote_ctl
+namespace heos_remote_lib
 {
-    public class Options
+    public class HeosAppOptions
     {
         [Option('d', "device", Required = true, HelpText = "Friedly name of HEOS device.")]
         public string? Device { get; set; }
@@ -24,7 +24,10 @@ namespace heos_remote_ctl
         [Option('t', "time-out", Required = false, HelpText = "Time-out in [ms].")]
         public int TimeOut { get; set; } = 3000;
 
-        // Singleton
-        public static Options Curr = new Options();
+        [Option('u', "username", Required = false, HelpText = "Username of the HEOS account (cleartext).")]
+        public string? Username { get; set; }
+
+        [Option('p', "password", Required = false, HelpText = "Password of the HEOS account (cleartext, sigh!).")]
+        public string? Password { get; set; }
     }
 }

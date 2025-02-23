@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using heos_remote_lib;
+using CommandLine;
 
 namespace heos_remote_ctl
 {
@@ -7,17 +8,18 @@ namespace heos_remote_ctl
         static async Task<int> Main(string[] args)
         {
             // parse options (do not care about errors)
-            var result = Parser.Default.ParseArguments<Options>(args);
+            var result = Parser.Default.ParseArguments<HeosAppOptions>(args);
             if (result.Value == null)
                 return -1;
-            Options.Curr = result.Value;
+            
+            var options = result.Value;
 
             // say hello
-            if (Options.Curr.Verbose > 0) 
+            if (options.Verbose > 0) 
                 Console.WriteLine("heos-remote-ctl (c) 2025 by Michael Hoffmeister, MIT license.");
 
             // find a device
-            var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: Options.Curr.Device, debugLevel: 2)).FirstOrDefault();
+            var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: options.Device, debugLevel: 2)).FirstOrDefault();
             if (device == null)
             {
                 Console.Error.WriteLine("No device found. Aborting!");
@@ -37,7 +39,7 @@ namespace heos_remote_ctl
 
             int? pid = null;
             foreach (var pay in o1.payload)
-                if (pay.name.ToString() == Options.Curr.Device)
+                if (pay.name.ToString() == options.Device)
                     pid = pay.pid;
 
             if (!pid.HasValue)

@@ -119,5 +119,25 @@ namespace heos_remote_systray {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] heos_remote_vol_down {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-vol-down", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] heos_remote_vol_up {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-vol-up", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

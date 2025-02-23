@@ -136,4 +136,10 @@
   <data name="heos-remote-fav3" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\heos-remote-fav3.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="heos-remote-vol-down" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos-remote-vol-down.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="heos-remote-vol-up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos-remote-vol-up.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
