@@ -25,7 +25,7 @@ namespace heos_remote_systray
 
         private ContextMenuStrip contextMenu;
 
-        private FormInfo? formInfo = null;
+        private FormInfo2? formInfo = null;
 
         public HeosCustomApplicationContext()
         {
@@ -209,6 +209,7 @@ namespace heos_remote_systray
             {
                 // ask for current
                 List<Tuple<string, string>>? nowPlay = new();
+                string imgUrl = null;
                 try
                 {
                     var output = await tc.SendCommandAsync($"heos://player/get_now_playing_media?pid={pid}\r\n");
@@ -222,13 +223,15 @@ namespace heos_remote_systray
                         foreach (var x in jpay)
                         {
                             nowPlay.Add(new Tuple<string, string>(x.Key, "" + x.Value?.ToString()));
+                            if (x.Key == "image_url")
+                                imgUrl = x.Value?.ToString() ?? "";
                         }
                 }
                 catch { }
 
                 // put this into the info
                 if (formInfo == null)
-                    formInfo = new FormInfo(devInfo: device, nowPlay: nowPlay);
+                    formInfo = new FormInfo2(devInfo: device, nowPlay: nowPlay, urlForImage: imgUrl);
                 formInfo.Show();
                 formInfo.FormClosed += new FormClosedEventHandler(formInfoClosedEventHandler);
             }
