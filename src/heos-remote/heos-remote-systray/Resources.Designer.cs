@@ -63,6 +63,26 @@ namespace heos_remote_systray {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
         /// </summary>
+        internal static byte[] heos_remote_aux_in {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-aux-in", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] heos_remote_browse {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-browse", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
         internal static byte[] heos_remote_fav1 {
             get {
                 object obj = ResourceManager.GetObject("heos-remote-fav1", resourceCulture);
@@ -93,9 +113,29 @@ namespace heos_remote_systray {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
         /// </summary>
+        internal static byte[] heos_remote_hdmi_in {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-hdmi-in", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
         internal static byte[] heos_remote_icon_I5p_icon {
             get {
                 object obj = ResourceManager.GetObject("heos_remote_icon_I5p_icon", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] heos_remote_next {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-next", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -116,6 +156,36 @@ namespace heos_remote_systray {
         internal static byte[] heos_remote_play {
             get {
                 object obj = ResourceManager.GetObject("heos-remote-play", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] heos_remote_prev {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-prev", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] heos_remote_spdif_in {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-spdif-in", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
+        internal static byte[] heos_remote_url {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-url", resourceCulture);
                 return ((byte[])(obj));
             }
         }

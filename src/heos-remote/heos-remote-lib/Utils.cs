@@ -29,5 +29,14 @@ namespace heos_remote_lib
             foreach (var x in list)
                 yield return x;
         }
+
+        public static bool EvalBool(string st)
+        {
+            if (st?.HasContent() != true)
+                return false;
+            if ("yes true 1".Contains(st.Trim().ToLower()))
+                return true;
+            return false;
+        }
     }
 }

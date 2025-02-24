@@ -29,5 +29,27 @@ namespace heos_remote_lib
 
         [Option('p', "password", Required = false, HelpText = "Password of the HEOS account (cleartext, sigh!).")]
         public string? Password { get; set; }
+
+        [Option("cids", HelpText = "Sequence of tuples, which are starting points for containers. Format name|sid|cid." )]
+        public IEnumerable<string>? StartCids { get; set; }
+
+        public IEnumerable<HeosContainerStartingPoint> GetStartPoints()
+        {
+            if (StartCids != null)
+                foreach (var tstr in StartCids)
+                {
+                    var tup = tstr?.Split('|');
+                    if (tup == null || tup.Length != 3)
+                        continue;
+                    if (!int.TryParse(tup[1], out var sid))
+                        continue;
+                    yield return new HeosContainerStartingPoint()
+                    {
+                        Name = tup[0].Trim(),
+                        Sid = sid,
+                        Cid = tup[2].Trim()
+                    };
+                }
+        }
     }
 }
