@@ -68,6 +68,7 @@
             buttonPlayAll.TabIndex = 1;
             buttonPlayAll.Text = "Play all ..";
             buttonPlayAll.UseVisualStyleBackColor = true;
+            buttonPlayAll.Click += button_Click;
             // 
             // dataGridView1
             // 
@@ -162,27 +163,29 @@
             labelQueueCount.ForeColor = Color.White;
             labelQueueCount.Location = new Point(73, 402);
             labelQueueCount.Name = "labelQueueCount";
-            labelQueueCount.Size = new Size(84, 39);
+            labelQueueCount.Size = new Size(110, 39);
             labelQueueCount.TabIndex = 5;
-            labelQueueCount.Text = "#233";
+            labelQueueCount.Text = "--";
             labelQueueCount.TextAlign = ContentAlignment.MiddleCenter;
+            labelQueueCount.DoubleClick += control_DoubleClick;
             // 
             // buttonQueueClear
             // 
             buttonQueueClear.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            buttonQueueClear.Location = new Point(163, 402);
+            buttonQueueClear.Location = new Point(189, 402);
             buttonQueueClear.Name = "buttonQueueClear";
             buttonQueueClear.Size = new Size(54, 39);
             buttonQueueClear.TabIndex = 6;
             buttonQueueClear.Text = "Clear";
             buttonQueueClear.UseVisualStyleBackColor = true;
+            buttonQueueClear.Click += button_Click;
             // 
             // label2
             // 
             label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 6F);
-            label2.Location = new Point(223, 406);
+            label2.Location = new Point(246, 406);
             label2.Name = "label2";
             label2.Size = new Size(27, 12);
             label2.TabIndex = 7;
@@ -193,7 +196,7 @@
             label3.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 6F);
-            label3.Location = new Point(223, 426);
+            label3.Location = new Point(246, 426);
             label3.Name = "label3";
             label3.Size = new Size(24, 12);
             label3.TabIndex = 8;
@@ -205,11 +208,11 @@
             labelQueueNext.BackColor = Color.SteelBlue;
             labelQueueNext.Font = new Font("Segoe UI", 6F);
             labelQueueNext.ForeColor = Color.White;
-            labelQueueNext.Location = new Point(257, 402);
+            labelQueueNext.Location = new Point(278, 402);
             labelQueueNext.Name = "labelQueueNext";
-            labelQueueNext.Size = new Size(531, 18);
+            labelQueueNext.Size = new Size(510, 18);
             labelQueueNext.TabIndex = 9;
-            labelQueueNext.Text = "Abba";
+            labelQueueNext.Text = "--";
             labelQueueNext.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // labelQueueLast
@@ -218,11 +221,11 @@
             labelQueueLast.BackColor = Color.SteelBlue;
             labelQueueLast.Font = new Font("Segoe UI", 6F);
             labelQueueLast.ForeColor = Color.White;
-            labelQueueLast.Location = new Point(257, 423);
+            labelQueueLast.Location = new Point(278, 423);
             labelQueueLast.Name = "labelQueueLast";
-            labelQueueLast.Size = new Size(531, 18);
+            labelQueueLast.Size = new Size(510, 18);
             labelQueueLast.TabIndex = 10;
-            labelQueueLast.Text = "Zappa";
+            labelQueueLast.Text = "--";
             labelQueueLast.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // progressBarQueue
@@ -237,7 +240,6 @@
             // 
             // label4
             // 
-            label4.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             label4.AutoSize = true;
             label4.Location = new Point(209, 16);
             label4.Margin = new Padding(0);

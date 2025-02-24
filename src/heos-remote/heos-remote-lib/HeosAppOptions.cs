@@ -33,7 +33,7 @@ namespace heos_remote_lib
         [Option("cids", HelpText = "Sequence of tuples, which are starting points for containers. Format name|sid|cid." )]
         public IEnumerable<string>? StartCids { get; set; }
 
-        public IEnumerable<HeosContainerStartingPoint> GetStartPoints()
+        public IEnumerable<HeosContainerLocation> GetStartPoints()
         {
             if (StartCids != null)
                 foreach (var tstr in StartCids)
@@ -43,7 +43,7 @@ namespace heos_remote_lib
                         continue;
                     if (!int.TryParse(tup[1], out var sid))
                         continue;
-                    yield return new HeosContainerStartingPoint()
+                    yield return new HeosContainerLocation()
                     {
                         Name = tup[0].Trim(),
                         Sid = sid,

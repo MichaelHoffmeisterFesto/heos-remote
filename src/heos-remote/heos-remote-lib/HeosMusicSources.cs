@@ -48,14 +48,14 @@ namespace heos_remote_lib
             return this;
         }
 
-        public IEnumerable<HeosContainerStartingPoint> GetStartPoints()
+        public IEnumerable<HeosContainerLocation> GetStartPoints()
         {
             foreach (var ms in this)
             {
                 // needs to be available
                 if (!ms.Available)
                     continue;
-                yield return new HeosContainerStartingPoint()
+                yield return new HeosContainerLocation()
                 {
                     Name = $"Home ({ms.Name})",
                     Sid = ms.Sid,

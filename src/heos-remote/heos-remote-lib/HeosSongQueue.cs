@@ -32,11 +32,15 @@ namespace heos_remote_lib
 
     public class HeosSongQueue : List<HeosSongQueueItem>
     {
+        public string CurrentQid = "";
+
         public async Task<HeosSongQueue?> Acquire(HeosConnectedItem ci, int pid)
         {
             // access
             if (!ci.IsValid())
                 return null;
+
+            CurrentQid = "";
 
             // do with pagination
             int recordOfs = 0;
@@ -70,8 +74,23 @@ namespace heos_remote_lib
                     break;
             }
 
+            // get also now playing info (shortened)
+            var o3 = await ci.Telnet.SendCommandAsync($"heos://player/get_now_playing_media?pid={pid}\r\n");
+            if (o3?.heos.result.ToString() == "success")
+            {
+                CurrentQid = o3.payload?.qid?.ToString() ?? "";
+            }
+
             // allow chaining
             return this;
+        }
+
+        public int SearchQidIndex(string qid)
+        {
+            for (int i = 0; i < this.Count; i++)
+                if (qid == this[i].Qid)
+                    return i;
+            return -1;
         }
     }
 }

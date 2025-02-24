@@ -20,21 +20,19 @@ namespace heos_remote_systray
 
         public HeosConnectedItem? Device = null;
 
-        public List<HeosContainerStartingPoint>? StartingPoints = null;
+        public List<HeosContainerLocation>? StartingPoints = null;
 
-        private int _sid = 3;
-        public int Sid { get { return _sid; } set { _sid = value; } }
-
-        private string _cid = "";
-        public string Cid { get { return _cid; } set { _cid = value; } }
+        public HeosContainerLocation CurrentLocation;
 
         public Func<Task<HeosSongQueue?>>? LambdaLoadSongQueue = null;
 
-        public Func<int, string, HeosContainerItem, int, Task>? LambdaPlayItem = null;
+        public Func<HeosContainerLocation, HeosContainerItem?, int, Task>? LambdaPlayItem = null;
+
+        public Func<Task>? LambdaClearQueue = null;
 
         public HeosContainerItem? ResultItem = null;
 
-        public List<HeosContainerStartingPoint> History = new();
+        public List<HeosContainerLocation> History = new();
 
         //
         // internal stuff
@@ -46,19 +44,27 @@ namespace heos_remote_systray
 
         protected HeosSongQueue? _queue = null;
 
+        protected HeosImageCache _imgCache = new();
+
         public FormContainerBrowser()
         {
-            InitializeComponent();            
+            InitializeComponent();
         }
 
-        public async Task RefreshContainer(int sid, string? cid)
+        public async Task RefreshContainer(HeosContainerLocation loc)
         {
             // access
             if (Device == null)
                 return;
 
+            // display name in top
+            if (loc.Name?.HasContent() == true)
+                this.Text = "Browse: " + loc.Name;
+            else
+                this.Text = "Browse (unknown location)";
+
             // get items
-            _containerItems = (await new HeosContainerList().Acquire(Device, sid, cid) ?? new HeosContainerList())
+            _containerItems = (await new HeosContainerList().Acquire(Device, loc.Sid, loc.Cid) ?? new HeosContainerList())
                 .Select((hci) => new ContainerBrowserItem(hci)).ToList();
 
             dataGridView1.AutoGenerateColumns = false;
@@ -78,16 +84,30 @@ namespace heos_remote_systray
 
             await Parallel.ForEachAsync(indices, options, async (ndx, token) =>
             {
-                var cbi = (_containersSource[ndx] as ContainerBrowserItem)?.Copy();
-                if (cbi.DisplayImageUrl?.HasContent() != true)
-                    return;
+                ContainerBrowserItem? cbi = null;
+                lock (_containerItems)
+                {
+                    if (ndx < 0 || ndx >= _containerItems.Count)
+                        return;
+                    cbi = (_containersSource[ndx] as ContainerBrowserItem)?.Copy();
+                    if (cbi.DisplayImageUrl?.HasContent() != true)
+                        return;
+                }
 
                 var response = await client.GetAsync(cbi.DisplayImageUrl);
                 if (!response.IsSuccessStatusCode)
                     return;
+
                 var ba = await response.Content.ReadAsByteArrayAsync();
-                cbi.DisplayImage = WinFormsUtils.ByteToImage(ba);
-                _containersSource[ndx] = cbi;
+
+                lock (_containerItems)
+                {
+                    if (ndx < 0 || ndx >= _containerItems.Count)
+                        return;
+
+                    cbi.DisplayImage = WinFormsUtils.ByteToImage(ba);
+                    _containersSource[ndx] = cbi;
+                }
             });
         }
 
@@ -106,8 +126,18 @@ namespace heos_remote_systray
             }
             else
             {
-                labelQueueCount.Text = "" + _queue.Count;
-                labelQueueNext.Text = "" + _queue.FirstOrDefault()?.GetDisplayInfo();
+                var currNdx = _queue.SearchQidIndex(_queue.CurrentQid);
+
+                if (currNdx >= 0)
+                    labelQueueCount.Text = $"{1 + currNdx} of {_queue.Count}";
+                else
+                    labelQueueCount.Text = "" + _queue.Count;
+
+                if (currNdx < _queue.Count - 1)
+                    labelQueueNext.Text = "" + _queue[currNdx + 1]?.GetDisplayInfo();
+                else
+                    labelQueueNext.Text = "(end reached)";
+
                 labelQueueLast.Text = "" + _queue.LastOrDefault()?.GetDisplayInfo();
             }
         }
@@ -133,8 +163,13 @@ namespace heos_remote_systray
             _initialFormLoad = false;
 
             // updates
-            await RefreshContainer(_sid, _cid);
+            await RefreshContainer(CurrentLocation);
             await RefreshQueue();
+        }
+
+        protected void ChargeRefreshQueue()
+        {
+            _ticksToRefreshQueue = 20;
         }
 
         protected int _ticksToRefreshQueue = 0;
@@ -169,15 +204,18 @@ namespace heos_remote_systray
             if (cbi.Item.Type == "heos_server" || cbi.Item.Type == "heos_service")
             {
                 // top level list for this source
-                _sid = cbi.Item.Sid;
-                await RefreshContainer(sid: cbi.Item.Sid, cid: null);
+                CurrentLocation.Name = cbi.Item.Name;
+                CurrentLocation.Sid = cbi.Item.Sid;
+                CurrentLocation.Cid = "";
+                await RefreshContainer(CurrentLocation);
             }
             else if (cbi.Item.IsContainer && cbi.Item.Cid?.HasContent() == true)
             {
                 // container, go deeper
-                History.Add(new HeosContainerStartingPoint() { Sid = _sid, Cid = _cid });
-                _cid = cbi.Item.Cid;
-                await RefreshContainer(_sid, _cid);
+                History.Add(CurrentLocation.Copy());
+                CurrentLocation.Name = CurrentLocation.Name + " / " + cbi.Item.Name;
+                CurrentLocation.Cid = cbi.Item.Cid;
+                await RefreshContainer(CurrentLocation);
             }
             else
             {
@@ -186,7 +224,7 @@ namespace heos_remote_systray
 
                 // music
                 if (LambdaPlayItem != null)
-                    await LambdaPlayItem.Invoke(_sid, _cid, cbi.Item, 1 + comboBoxAction.SelectedIndex);
+                    await LambdaPlayItem.Invoke(CurrentLocation, cbi.Item, 1 + comboBoxAction.SelectedIndex);
 
                 // stay or leave
                 if (comboBoxAction.SelectedIndex == 0 || comboBoxAction.SelectedIndex == 1)
@@ -199,7 +237,7 @@ namespace heos_remote_systray
                 else
                 {
                     // stay, eye candy
-                    _ticksToRefreshQueue = 20;
+                    ChargeRefreshQueue();
                 }
             }
         }
@@ -219,9 +257,39 @@ namespace heos_remote_systray
                 History.RemoveAt(History.Count - 1);
 
                 // refresh
-                _cid = last.Cid;
-                _sid = last.Sid;
-                await RefreshContainer(_sid, _cid);
+                CurrentLocation = last.Copy();
+                await RefreshContainer(CurrentLocation);
+            }
+
+            if (sender == buttonQueueClear && LambdaClearQueue != null)
+            {
+                await LambdaClearQueue.Invoke();
+                ChargeRefreshQueue();
+            }
+
+            if (sender == buttonPlayAll && _containerItems.Count > 0
+                && CurrentLocation.Cid?.HasContent() == true)
+            {
+                // give immediate feedback
+                progressBarQueue.Value = progressBarQueue.Maximum;
+
+                // item == null means the whole container
+                if (LambdaPlayItem != null)
+                    await LambdaPlayItem.Invoke(CurrentLocation, null, 1 + comboBoxAction.SelectedIndex);
+
+                // stay or leave
+                if (comboBoxAction.SelectedIndex == 0 || comboBoxAction.SelectedIndex == 1)
+                {
+                    // leave, successful
+                    progressBarQueue.Value = 0;
+                    ResultItem = null;
+                    DialogResult = DialogResult.OK;
+                }
+                else
+                {
+                    // stay, eye candy
+                    ChargeRefreshQueue();
+                }
             }
         }
 
@@ -235,9 +303,17 @@ namespace heos_remote_systray
                 return;
 
             // do it
-            _sid = StartingPoints[si].Sid;
-            _cid = StartingPoints[si].Cid;
-            await RefreshContainer(_sid, _cid);
+            History.Add(CurrentLocation.Copy());
+            CurrentLocation = StartingPoints[si].Copy();
+            await RefreshContainer(CurrentLocation);
+        }
+
+        private void control_DoubleClick(object sender, EventArgs e)
+        {
+            if (sender == labelQueueCount)
+            {
+                ChargeRefreshQueue();
+            }
         }
     }
 

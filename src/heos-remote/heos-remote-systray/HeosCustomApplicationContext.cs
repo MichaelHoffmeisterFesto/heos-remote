@@ -29,18 +29,15 @@ namespace heos_remote_systray
 
         private HeosConnectedItemMgr ConnMgr = new();
 
-        protected int _currentContainerSid = 3; // TuneIn
-        protected string _currentContainerCid = ""; // empty
+        protected HeosContainerLocation _currentBrowseLocation = new HeosContainerLocation() { Name = "TuneIn", Sid = 3, Cid = "" };
+        protected List<HeosContainerLocation> _currentHistory = new List<HeosContainerLocation>();
 
         public HeosCustomApplicationContext()
         {
             // some inits
             var startCnt = Options.Curr.GetStartPoints()?.FirstOrDefault();
             if (startCnt != null)
-            {
-                _currentContainerSid = startCnt.Sid;
-                _currentContainerCid = startCnt.Cid;
-            }
+                _currentBrowseLocation = startCnt.Copy();
 
             // configure context menu
             contextMenu = new ContextMenuStrip()
@@ -314,8 +311,8 @@ namespace heos_remote_systray
                 var formBrowse = new FormContainerBrowser();
                 formBrowse.Device = device;
                 formBrowse.StartingPoints = starts?.ToList();
-                formBrowse.Sid = _currentContainerSid;
-                formBrowse.Cid = _currentContainerCid;
+                formBrowse.CurrentLocation = _currentBrowseLocation.Copy();
+                formBrowse.History = new List<HeosContainerLocation>(_currentHistory);
 
                 formBrowse.LambdaLoadSongQueue = async () =>
                 {
@@ -323,16 +320,37 @@ namespace heos_remote_systray
                     return sq;
                 };
 
-                formBrowse.LambdaPlayItem = async (sid, parentCid, item, action) =>
+                formBrowse.LambdaClearQueue = async () =>
+                {
+                    // execute
+                    var o5 = await device.Telnet.SendCommandAsync($"heos://player/clear_queue?pid={pid}\r\n");
+                    if (o5?.heos.result.ToString() != "success")
+                    {
+                        trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/clear_queue returned with no success. Aborting!", ToolTipIcon.Info);
+                        return;
+                    }
+                };
+
+                formBrowse.LambdaPlayItem = async (parentLoc, item, action) =>
                 {
                     // access
-                    if (item == null || action < 1 || action > 4)
+                    if (action < 1 || action > 4)
                         return;
-                    // which kind
-                    if (item.IsContainer)
+                    // which kind?
+                    if (item == null && parentLoc != null)
+                    {
+                        // play the full container
+                        var o7 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&aid={action}\r\n");
+                        if (o7?.heos.result.ToString() != "success")
+                        {
+                            trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/add_to_queue returned with no success. Aborting!", ToolTipIcon.Info);
+                            return;
+                        }
+                    }
+                    else if (item?.IsContainer == true)
                     {
                         // add container to queue
-                        var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={sid}&cid={item.Cid}\r\n");
+                        var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={item.Cid}\r\n");
                         if (o5?.heos.result.ToString() != "success")
                         {
                             trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/get_now_playing_media returned with no success. Aborting!", ToolTipIcon.Info);
@@ -340,12 +358,12 @@ namespace heos_remote_systray
                         }
 
                     }
-                    else if (item.Mid?.HasContent() == true)
+                    else if (item?.Mid?.HasContent() == true)
                     {
                         if (item.Type == "station")
                         {
                             // play the stream (is not a track)
-                            var o5 = await device.Telnet.SendCommandAsync($"heos://browse/play_stream?pid={pid}&sid={sid}&cid={parentCid}&mid={item.Mid}&name={item.Name}\r\n");
+                            var o5 = await device.Telnet.SendCommandAsync($"heos://browse/play_stream?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&mid={item.Mid}&name={item.Name}\r\n");
                             if (o5?.heos.result.ToString() != "success")
                             {
                                 trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/play_stream returned with no success. Aborting!", ToolTipIcon.Info);
@@ -355,7 +373,7 @@ namespace heos_remote_systray
                         else
                         {
                             // add track to queue
-                            var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={sid}&cid={parentCid}&mid={item.Mid}&aid={action}\r\n");
+                            var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&mid={item.Mid}&aid={action}\r\n");
                             if (o5?.heos.result.ToString() != "success")
                             {
                                 trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/add_to_queue returned with no success. Aborting!", ToolTipIcon.Info);
@@ -369,8 +387,8 @@ namespace heos_remote_systray
                 if (res == DialogResult.OK)
                 {
                     // save actual location
-                    _currentContainerSid = formBrowse.Sid;
-                    _currentContainerCid = formBrowse.Cid;
+                    _currentBrowseLocation = formBrowse.CurrentLocation.Copy();
+                    _currentHistory = new List<HeosContainerLocation>(formBrowse.History);
                 }
             }
 

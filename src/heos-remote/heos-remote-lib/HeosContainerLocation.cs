@@ -9,10 +9,13 @@ namespace heos_remote_lib
     /// <summary>
     /// For browsing, starting points (container pathes together with source ids) are required
     /// </summary>
-    public class HeosContainerStartingPoint
+    public class HeosContainerLocation
     {
         public string Name { get; set; } = "";
         public int Sid = 0;
         public string Cid { get; set; } = "";
+
+        public HeosContainerLocation Copy() =>
+            new HeosContainerLocation() { Name = Name, Sid = Sid, Cid = Cid };
     }
 }
