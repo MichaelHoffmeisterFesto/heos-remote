@@ -49,6 +49,8 @@ namespace heos_remote_systray
         public FormContainerBrowser()
         {
             InitializeComponent();
+
+            this.Icon = WinFormsUtils.BytesToIcon(Resources.heos_remote_icon_I5p_icon);
         }
 
         public async Task RefreshContainer(HeosContainerLocation loc)
@@ -80,7 +82,7 @@ namespace heos_remote_systray
             // test
             var indices = Enumerable.Range(0, _containerItems.Count);
             var client = new HttpClient();
-            var options = new ParallelOptions { MaxDegreeOfParallelism = 1 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = 8 };
 
             await Parallel.ForEachAsync(indices, options, async (ndx, token) =>
             {
@@ -94,18 +96,16 @@ namespace heos_remote_systray
                         return;
                 }
 
-                var response = await client.GetAsync(cbi.DisplayImageUrl);
-                if (!response.IsSuccessStatusCode)
+                var bm = await _imgCache.DownloadAndCache(client, cbi.DisplayImageUrl, new Size(60,60));
+                if (bm == null)
                     return;
-
-                var ba = await response.Content.ReadAsByteArrayAsync();
 
                 lock (_containerItems)
                 {
                     if (ndx < 0 || ndx >= _containerItems.Count)
                         return;
 
-                    cbi.DisplayImage = WinFormsUtils.ByteToImage(ba);
+                    cbi.DisplayImage = bm;
                     _containersSource[ndx] = cbi;
                 }
             });
@@ -315,6 +315,7 @@ namespace heos_remote_systray
                 ChargeRefreshQueue();
             }
         }
+
     }
 
     public class ContainerBrowserItem

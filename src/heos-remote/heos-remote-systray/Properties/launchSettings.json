@@ -2,7 +2,7 @@
   "profiles": {
     "heos-remote-systray": {
       "commandName": "Project",
-      "commandLineArgs": "-d \"Schlafzimmer\" -u \"michahofft2@googlemail.com\" -p \"Enter1$3\""
+      "commandLineArgs": "-d \"Schlafzimmer\" -u \"michahofft2@googlemail.com\" -p \"Enter1$3\" --cids \"Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten\""
     }
   }
 }

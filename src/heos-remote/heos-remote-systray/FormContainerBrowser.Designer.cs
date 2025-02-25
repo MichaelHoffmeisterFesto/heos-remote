@@ -250,6 +250,7 @@
             // 
             // comboBoxStarting
             // 
+            comboBoxStarting.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             comboBoxStarting.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxStarting.FormattingEnabled = true;
             comboBoxStarting.Location = new Point(287, 12);

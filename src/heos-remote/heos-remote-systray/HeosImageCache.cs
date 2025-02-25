@@ -13,7 +13,7 @@ namespace heos_remote_systray
     /// </summary>
     public class HeosImageCache : Dictionary<string, Bitmap>
     {
-        public async Task<Bitmap?> DownloadAndCache(HttpClient client, string url)
+        public async Task<Bitmap?> DownloadAndCache(HttpClient client, string url, Size? resizeImgs = null)
         {
             // access
             if (client == null || url?.HasContent() != true)
@@ -35,11 +35,21 @@ namespace heos_remote_systray
             var ba = await response.Content.ReadAsByteArrayAsync();
             var bm2 = WinFormsUtils.ByteToImage(ba);
 
+            // resize
+            Bitmap bm3 = bm2;
+            if (resizeImgs != null)
+            {
+                bm3 = new Bitmap(bm2, resizeImgs.Value);
+                bm2.Dispose();
+            }
+
+            // situation might have changed during async
             // remeber
-            this.Add(url, bm2);
+            if (!this.ContainsKey(url))
+                this.Add(url, bm3);
 
             // give back
-            return bm2;
+            return bm3;
         }
     }
 }
