@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
@@ -9,8 +10,8 @@ namespace heos_remote_lib
 {
     public class HeosAppOptions
     {
-        [Option('d', "device", Required = true, HelpText = "Friedly name of HEOS device.")]
-        public string? Device { get; set; }
+        [Option('d', "device", Required = true, HelpText = "Sequence of one to many friedly name of HEOS device(s). Each may be of format name|host:port to disable auto discovery.")]
+        public IEnumerable<string> Devices { get; set; } = Enumerable.Empty<string>();
 
         [Option('m', "manufacturer", Required = false, HelpText = "Manufacturer name of HEOS device; first device will be taken.")]
         public string? Manufacturer { get; set; }
@@ -31,7 +32,22 @@ namespace heos_remote_lib
         public string? Password { get; set; }
 
         [Option("cids", HelpText = "Sequence of tuples, which are starting points for containers. Format name|sid|cid." )]
-        public IEnumerable<string>? StartCids { get; set; }
+        public IEnumerable<string> StartCids { get; set; } = Enumerable.Empty<string>();
+
+        public static Tuple<string?, IPEndPoint?> SplitDeviceName(string? deviceName)
+        {
+            // access
+            if (deviceName?.HasContent() != true)
+                return new Tuple<string?, IPEndPoint?>(null, null);
+
+            // split?
+            var parts = deviceName.Split('|');
+            if (parts.Length != 2)
+                return new Tuple<string?, IPEndPoint?>(parts[0], null);
+            
+            // 2 parts
+            return new Tuple<string?, IPEndPoint?>(parts[0], IPEndPoint.Parse(parts[1]));
+        }
 
         public IEnumerable<HeosContainerLocation> GetStartPoints()
         {

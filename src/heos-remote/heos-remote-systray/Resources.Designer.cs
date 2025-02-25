@@ -133,6 +133,16 @@ namespace heos_remote_systray {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
         /// </summary>
+        internal static byte[] heos_remote_info {
+            get {
+                object obj = ResourceManager.GetObject("heos-remote-info", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
         internal static byte[] heos_remote_next {
             get {
                 object obj = ResourceManager.GetObject("heos-remote-next", resourceCulture);

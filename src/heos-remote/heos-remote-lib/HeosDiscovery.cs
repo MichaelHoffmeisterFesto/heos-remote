@@ -17,7 +17,7 @@ namespace heos_remote_lib
     {
         public string Location = "";
         public string Host = "";
-        public int Port = 60001;
+        public int Port = HeosTelnet.DefaultPort;
         public string XmlDescription = "";
         public string FriendlyName = "";
         public string Manufacturer = "";
@@ -207,7 +207,7 @@ namespace heos_remote_lib
                             {
                                 var uri = new Uri(xmlLocation ?? "");
                                 item.Host = uri.Host;
-                                item.Port = uri.Port;
+                                item.Port = HeosTelnet.DefaultPort;
                             } catch (Exception ex)
                             {
                                 ;

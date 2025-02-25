@@ -49,7 +49,7 @@ namespace heos_remote_lib
             {
                 // get
                 var o2 = await ci.Telnet.SendCommandAsync($"heos://player/get_queue?pid={pid}&range={recordOfs},{recordOfs + 99}\r\n");
-                if (o2?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(o2))
                     break;
                 recordOfs += 100;
 

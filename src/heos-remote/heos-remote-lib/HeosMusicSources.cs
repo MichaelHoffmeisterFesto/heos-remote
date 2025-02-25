@@ -26,7 +26,7 @@ namespace heos_remote_lib
 
             // get
             var o2 = await ci.Telnet.SendCommandAsync($"heos://browse/get_music_sources\r\n");
-            if (o2?.heos.result.ToString() != "success")
+            if (!HeosTelnet.IsSuccessCode(o2))
                 return null;
 
             foreach (var x in o2.payload)

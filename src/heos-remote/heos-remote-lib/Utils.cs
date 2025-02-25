@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +38,27 @@ namespace heos_remote_lib
             if ("yes true 1".Contains(st.Trim().ToLower()))
                 return true;
             return false;
+        }
+
+        // see: https://stackoverflow.com/questions/9956648/how-do-i-check-if-a-property-exists-on-a-dynamic-anonymous-type-in-c
+        public static bool PropertyExists(dynamic obj, string name)
+        {
+            if (obj == null) return false;
+
+            else if (obj is IDictionary<string, object> dict)
+            {
+                return dict.ContainsKey(name);
+            }
+
+            else if (obj is Newtonsoft.Json.Linq.JObject jObject)
+            {
+                return jObject.ContainsKey(name);
+            }
+
+            else
+            {
+                return obj.GetType().GetProperty(name) != null;
+            }
         }
     }
 }

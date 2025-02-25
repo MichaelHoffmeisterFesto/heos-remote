@@ -19,7 +19,7 @@ namespace heos_remote_ctl
                 Console.WriteLine("heos-remote-ctl (c) 2025 by Michael Hoffmeister, MIT license.");
 
             // find a device
-            var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: options.Device, debugLevel: 2)).FirstOrDefault();
+            var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: options.Devices, debugLevel: 2)).FirstOrDefault();
             if (device == null)
             {
                 Console.Error.WriteLine("No device found. Aborting!");
@@ -27,11 +27,11 @@ namespace heos_remote_ctl
             }
 
             // TelnetClient builds up a connection per send
-            var tc = new TelnetClient(device.Host, 1255);
+            var tc = new HeosTelnet(device.Host);
 
             // find the player
             var o1 = await tc.SendCommandAsync("heos://player/get_players\r\n");
-            if (o1?.heos.result.ToString() != "success")
+            if (!HeosTelnet.IsSuccessCode(o1))
             {
                 Console.Error.WriteLine("heos://player/get_players returned with no success. Aborting!");
                 return -1;
@@ -39,7 +39,7 @@ namespace heos_remote_ctl
 
             int? pid = null;
             foreach (var pay in o1.payload)
-                if (pay.name.ToString() == options.Device)
+                if (pay.name.ToString() == options.Devices)
                     pid = pay.pid;
 
             if (!pid.HasValue)
@@ -50,7 +50,7 @@ namespace heos_remote_ctl
 
             // get player state
             var o2 = await tc.SendCommandAsync($"heos://player/get_play_state?pid={pid}\r\n");
-            if (o2?.heos.result.ToString() != "success")
+            if (!HeosTelnet.IsSuccessCode(o2))
             {
                 Console.Error.WriteLine("heos://player/get_play_state returned with no success. Aborting!");
                 return -1;
@@ -59,7 +59,7 @@ namespace heos_remote_ctl
 
             // pause
             var o3 = await tc.SendCommandAsync($"heos://player/set_play_state?pid={pid}&state={"play"}\r\n");
-            if (o3?.heos.result.ToString() != "success")
+            if (!HeosTelnet.IsSuccessCode(o3))
             {
                 Console.Error.WriteLine("heos://player/set_play_state returned with no success. Aborting!");
                 return -1;

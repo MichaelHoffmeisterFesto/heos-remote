@@ -17,20 +17,20 @@ namespace heos_remote_lib
         public string ErrorMessage = "";
     }
 
-    public class TelnetClient
+    public class HeosTelnet
     {
         public const int DefaultPort = 1255;
 
         private readonly string _host;
         private readonly int _port;
 
-        public TelnetClient(string host, int port = DefaultPort)
+        public HeosTelnet(string host, int port = DefaultPort)
         {
             _host = host;
             _port = port;
         }
 
-        public async Task<dynamic?> SendCommandAsync(string command)
+        public async Task<dynamic> SendCommandAsync(string command)
         {
             using var client = new TcpClient();
             await client.ConnectAsync(_host, _port);
@@ -77,14 +77,19 @@ namespace heos_remote_lib
 
                 try
                 {
-                    return JsonConvert.DeserializeObject(response);
+                    return JsonConvert.DeserializeObject(response) ?? new object(); 
                 }
                 catch (Newtonsoft.Json.JsonException)
                 {
                     Console.WriteLine("Invalid JSON received.");
-                    return null;
+                    return new object();
                 }
             }
+        }
+
+        public static bool IsSuccessCode(dynamic? o)
+        {
+            return Utils.PropertyExists(o, "heos") && o?.heos.result.ToString() == "success";
         }
 
         public void Close()

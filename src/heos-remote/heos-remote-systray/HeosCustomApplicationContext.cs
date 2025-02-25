@@ -16,6 +16,7 @@ using heos_remote_lib;
 using Options = heos_remote_systray.OptionsSingleton;
 using static System.Windows.Forms.Design.AxImporter;
 using Newtonsoft.Json.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Menu;
 
 namespace heos_remote_systray
 {
@@ -32,6 +33,10 @@ namespace heos_remote_systray
         protected HeosContainerLocation _currentBrowseLocation = new HeosContainerLocation() { Name = "TuneIn", Sid = 3, Cid = "" };
         protected List<HeosContainerLocation> _currentHistory = new List<HeosContainerLocation>();
 
+        protected ToolStripDropDownButton? _deviceDropDownButton = null;
+
+        protected string _activeDeviceName = "XXX";
+
         public HeosCustomApplicationContext()
         {
             // some inits
@@ -43,7 +48,23 @@ namespace heos_remote_systray
             contextMenu = new ContextMenuStrip()
             {
             };
-            
+
+            ////////
+
+            _deviceDropDownButton = BuildContextMenuDropDown(
+                "D:Schlafzimmer  \u25b6 ",
+                Options.Curr.Devices.Select((dev) =>
+                {
+                    var (fn, ep) = HeosAppOptions.SplitDeviceName(dev);
+                    return "" + fn;
+                }).ToArray(),
+                showDropDownArrow: false,
+                onClick: contextMenuItemHandler);
+
+            contextMenu.Items.Add(_deviceDropDownButton);
+
+            ////////
+
             contextMenu.Items.Add("Play", image: WinFormsUtils.ByteToImage(Resources.heos_remote_play), 
                 onClick: contextMenuItemHandler);
             contextMenu.Items.Add("Pause", image: WinFormsUtils.ByteToImage(Resources.heos_remote_pause),
@@ -77,7 +98,7 @@ namespace heos_remote_systray
             contextMenu.Items.Add("Play URL", image: WinFormsUtils.ByteToImage(Resources.heos_remote_url),
                 onClick: contextMenuItemHandler);
             contextMenu.Items.Add(new ToolStripSeparator());
-            contextMenu.Items.Add("Info", image: null,
+            contextMenu.Items.Add("Info", image: WinFormsUtils.ByteToImage(Resources.heos_remote_info),
                 onClick: contextMenuItemHandler);
             contextMenu.Items.Add(new ToolStripSeparator());
             contextMenu.Items.Add("Exit", image: null, 
@@ -95,6 +116,31 @@ namespace heos_remote_systray
             trayIcon.DoubleClick += new System.EventHandler(trayIcon_DoubleClick);
         }
 
+        protected ToolStripDropDownButton BuildContextMenuDropDown(
+            string rootName,
+            string[] items,
+            EventHandler? onClick,
+            bool showDropDownArrow = true)
+        {
+            var res = new ToolStripDropDownButton();
+            var dropDown = new ToolStripDropDown() { DropShadowEnabled = false };
+            res.Text = rootName;
+
+            res.Margin = new Padding(2, 8, 2, 2);
+            res.DropDown = dropDown;
+            res.AutoToolTip = false;
+            res.DropDownDirection = ToolStripDropDownDirection.Right;
+            res.ShowDropDownArrow = showDropDownArrow;
+
+            foreach (var item in items)
+            {
+                var itemButton = new ToolStripButton(text: item, image: null, onClick: onClick);
+                dropDown.Items.Add(item);
+            }
+
+            return res;
+        }
+
         async Task executeCommand(string cmd)
         {
             // check first
@@ -105,8 +151,8 @@ namespace heos_remote_systray
 
             // establish device
             // var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: Options.Curr.Device, debugLevel: 0)).FirstOrDefault();
-            var device = await ConnMgr.DiscoverOrGet(friedlyName: Options.Curr.Device ?? "", debugLevel: 0);
-            if (device == null)
+            var device = await ConnMgr.DiscoverOrGet(friedlyName: Options.Curr.Devices ?? "", debugLevel: 0);
+            if (device?.Telnet == null)
             {
                 trayIcon.ShowBalloonTip(500, "HEOS Control", "No device found. Aborting!", ToolTipIcon.Info);
                 return;
@@ -114,15 +160,16 @@ namespace heos_remote_systray
 
             // find the player
             var o1 = await device.Telnet.SendCommandAsync("heos://player/get_players\r\n");
-            if (o1?.heos.result.ToString() != "success")
+            if (!HeosTelnet.IsSuccessCode(o1))
             {
                 trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/get_players returned with no success. Aborting!", ToolTipIcon.Info);
                 return;
             }
 
+            var (fn, ep) = HeosAppOptions.SplitDeviceName(Options.Curr.Devices);
             int? pid = null;
             foreach (var pay in o1.payload)
-                if (pay.name.ToString() == Options.Curr.Device)
+                if (pay.name.ToString() == fn)
                     pid = pay.pid;
 
             if (!pid.HasValue)
@@ -135,7 +182,7 @@ namespace heos_remote_systray
             {
                 // pause
                 var output = await device.Telnet.SendCommandAsync($"heos://player/set_play_state?pid={pid}&state={"pause"}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/set_play_state returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -146,7 +193,7 @@ namespace heos_remote_systray
             {
                 // play
                 var output = await device.Telnet.SendCommandAsync($"heos://player/set_play_state?pid={pid}&state={"play"}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/set_play_state returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -157,7 +204,7 @@ namespace heos_remote_systray
             {
                 // get the state
                 var output = await device.Telnet.SendCommandAsync($"heos://player/get_play_state?pid={pid}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/get_play_state returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -169,7 +216,7 @@ namespace heos_remote_systray
 
                 // pause
                 output = await device.Telnet.SendCommandAsync($"heos://player/set_play_state?pid={pid}&state={nextPlayState}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/set_play_state returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -180,7 +227,7 @@ namespace heos_remote_systray
             {
                 // next
                 var output = await device.Telnet.SendCommandAsync($"heos://player/play_next?pid={pid}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/play_next returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -191,7 +238,7 @@ namespace heos_remote_systray
             {
                 // previous
                 var output = await device.Telnet.SendCommandAsync($"heos://player/play_previous?pid={pid}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/play_previous returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -202,7 +249,7 @@ namespace heos_remote_systray
             {
                 // volume down
                 var output = await device.Telnet.SendCommandAsync($"heos://player/volume_up?pid={pid}&step={5}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/volume_up returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -213,7 +260,7 @@ namespace heos_remote_systray
             {
                 // volume down
                 var output = await device.Telnet.SendCommandAsync($"heos://player/volume_down?pid={pid}&step={5}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/volume_down returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -237,7 +284,7 @@ namespace heos_remote_systray
 
                 // check in
                 var output = await device.Telnet.SendCommandAsync($"heos://system/sign_in?un={Options.Curr.Username}&pw={Options.Curr.Password}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://system/sign_in returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -245,7 +292,7 @@ namespace heos_remote_systray
 
                 // select
                 output = await device.Telnet.SendCommandAsync($"heos://browse/play_preset?pid={pid}&preset={favNdx}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/play_preset returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -261,7 +308,7 @@ namespace heos_remote_systray
 
                 // select
                 var output = await device.Telnet.SendCommandAsync($"heos://browse/play_input?pid={pid}&input={input}\r\n");
-                if (output?.heos.result.ToString() != "success")
+                if (!HeosTelnet.IsSuccessCode(output))
                 {
                     trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/play_input returned with no success. Aborting!", ToolTipIcon.Info);
                     return;
@@ -276,7 +323,7 @@ namespace heos_remote_systray
                 try
                 {
                     var output = await device.Telnet.SendCommandAsync($"heos://player/get_now_playing_media?pid={pid}\r\n");
-                    if (output?.heos.result.ToString() != "success")
+                    if (!HeosTelnet.IsSuccessCode(output))
                     {
                         trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/get_now_playing_media returned with no success. Aborting!", ToolTipIcon.Info);
                         return;
@@ -324,7 +371,7 @@ namespace heos_remote_systray
                 {
                     // execute
                     var o5 = await device.Telnet.SendCommandAsync($"heos://player/clear_queue?pid={pid}\r\n");
-                    if (o5?.heos.result.ToString() != "success")
+                    if (!HeosTelnet.IsSuccessCode(o5))
                     {
                         trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/clear_queue returned with no success. Aborting!", ToolTipIcon.Info);
                         return;
@@ -341,7 +388,7 @@ namespace heos_remote_systray
                     {
                         // play the full container
                         var o7 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&aid={action}\r\n");
-                        if (o7?.heos.result.ToString() != "success")
+                        if (!HeosTelnet.IsSuccessCode(o7))
                         {
                             trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/add_to_queue returned with no success. Aborting!", ToolTipIcon.Info);
                             return;
@@ -351,7 +398,7 @@ namespace heos_remote_systray
                     {
                         // add container to queue
                         var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={item.Cid}\r\n");
-                        if (o5?.heos.result.ToString() != "success")
+                        if (!HeosTelnet.IsSuccessCode(o5))
                         {
                             trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/get_now_playing_media returned with no success. Aborting!", ToolTipIcon.Info);
                             return;
@@ -364,7 +411,7 @@ namespace heos_remote_systray
                         {
                             // play the stream (is not a track)
                             var o5 = await device.Telnet.SendCommandAsync($"heos://browse/play_stream?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&mid={item.Mid}&name={item.Name}\r\n");
-                            if (o5?.heos.result.ToString() != "success")
+                            if (!HeosTelnet.IsSuccessCode(o5))
                             {
                                 trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/play_stream returned with no success. Aborting!", ToolTipIcon.Info);
                                 return;
@@ -374,7 +421,7 @@ namespace heos_remote_systray
                         {
                             // add track to queue
                             var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&mid={item.Mid}&aid={action}\r\n");
-                            if (o5?.heos.result.ToString() != "success")
+                            if (!HeosTelnet.IsSuccessCode(o5))
                             {
                                 trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/add_to_queue returned with no success. Aborting!", ToolTipIcon.Info);
                                 return;
@@ -401,7 +448,7 @@ namespace heos_remote_systray
                     var ms2 = await new HeosSearchCriteriaList().Acquire(device, sid: 13);
 
                     var o5 = await device.Telnet.SendCommandAsync($"heos://browse/search?sid={13}&search={"Sting"}\r\n");
-                    if (o5?.heos.result.ToString() != "success")
+                    if (!HeosTelnet.IsSuccessCode(o5))
                     {
                         trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://player/get_now_playing_media returned with no success. Aborting!", ToolTipIcon.Info);
                         return;
@@ -423,7 +470,7 @@ namespace heos_remote_systray
                     if (dlg.ResultSource == "Internet radio" && dlg.ResultKind == "URL")
                     {
                         var output = await device.Telnet.SendCommandAsync($"heos://browse/play_stream?pid={pid}&url={dlg.ResultText}\r\n");
-                        if (output?.heos.result.ToString() != "success")
+                        if (!HeosTelnet.IsSuccessCode(output))
                         {
                             trayIcon.ShowBalloonTip(500, "HEOS Control", "heos://browse/play_stream returned with no success. Aborting!", ToolTipIcon.Info);
                             return;

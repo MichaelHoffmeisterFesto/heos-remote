@@ -9,7 +9,7 @@ namespace heos_remote_lib
     public class HeosConnectedItem
     {
         public HeosDiscoveredItem Item;
-        public TelnetClient Telnet;
+        public HeosTelnet? Telnet;
         public DateTime LastUpdate = DateTime.UtcNow;
 
         public HeosConnectedItem(HeosDiscoveredItem item)
@@ -39,15 +39,20 @@ namespace heos_remote_lib
             if (!friedlyName.HasContent())
                 return null;
 
+            // split 
+            var (fn, ep) = HeosAppOptions.SplitDeviceName(friedlyName);
+            if (fn == null)
+                return null;
+
             // check if a connection is already stored and young enough
-            if (this.ContainsKey(friedlyName))
+            if (this.ContainsKey(fn))
             {
                 // get the item
-                var item = this[friedlyName];
+                var item = this[fn];
                 if ((DateTime.UtcNow - item.LastUpdate).TotalSeconds < RenewalSecs)
                 {
                     // probe, if alive
-                    item.Telnet = new TelnetClient(item.Item.Host);
+                    item.Telnet = new HeosTelnet(item.Item.Host);
                     var o1 = await item.Telnet.SendCommandAsync("heos://system/heart_beat\r\n");
                     if (o1?.heos.result.ToString() == "success")
                     {
@@ -59,22 +64,41 @@ namespace heos_remote_lib
                 // no success, try close and remove
                 if (item.Telnet != null)
                     item.Telnet.Close();
-                this.Remove(friedlyName);
+                this.Remove(fn);
             }
 
-            // make new discovery
-            var newDi = (await HeosDiscovery.DiscoverItems(
-                firstFriedlyName: friedlyName,
-                debugLevel: debugLevel,
-                timeOutMs: timeOutMs,
-                interfaceName: interfaceName))?.FirstOrDefault();
+            // no connection, but make according endpoint
+            HeosDiscoveredItem? newDi = null;
+            if (ep != null)
+            {
+                if (ep.Port == 0)
+                    ep.Port = HeosTelnet.DefaultPort;
+                newDi = new()
+                {
+                    FriendlyName = fn,
+                    Host = ep.Address.ToString(),
+                    Port = ep.Port,
+                    Location = "",
+                    XmlDescription = "",
+                    Manufacturer = ""
+                };
+            }
+            else
+            {
+                // make new discovery
+                newDi = (await HeosDiscovery.DiscoverItems(
+                    firstFriedlyName: friedlyName,
+                    debugLevel: debugLevel,
+                    timeOutMs: timeOutMs,
+                    interfaceName: interfaceName))?.FirstOrDefault();
+            }
             if (newDi == null)
                 return null;
 
             // ok make new item
             var newIt = new HeosConnectedItem(newDi);
-            newIt.Telnet = new TelnetClient(newDi.Host);
-            this.Add(friedlyName, newIt);
+            newIt.Telnet = new HeosTelnet(newDi.Host, newDi.Port);
+            this.Add(fn, newIt);
 
             // return 
             return newIt;
