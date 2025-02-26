@@ -33,7 +33,7 @@ namespace heos_remote_systray
         protected HeosContainerLocation _currentBrowseLocation = new HeosContainerLocation() { Name = "TuneIn", Sid = 3, Cid = "" };
         protected List<HeosContainerLocation> _currentHistory = new List<HeosContainerLocation>();
 
-        protected ToolStripDropDownButton? _deviceDropDownButton = null;
+        protected ToolStripMenuItem? _deviceDropDownButton = null;
 
         protected string _activeDeviceName = "XXX";
 
@@ -44,6 +44,8 @@ namespace heos_remote_systray
             if (startCnt != null)
                 _currentBrowseLocation = startCnt.Copy();
 
+            _activeDeviceName = "" + Options.Curr.GetDeviceTuples().FirstOrDefault()?.Item1;
+
             // configure context menu
             contextMenu = new ContextMenuStrip()
             {
@@ -51,17 +53,26 @@ namespace heos_remote_systray
 
             ////////
 
-            _deviceDropDownButton = BuildContextMenuDropDown(
-                "D:Schlafzimmer  \u25b6 ",
-                Options.Curr.Devices.Select((dev) =>
+            _deviceDropDownButton = BuildContextSubMenu(
+                "D:Schlafzimmer",
+                Options.Curr.GetDeviceTuples().Select((tup) =>
                 {
-                    var (fn, ep) = HeosAppOptions.SplitDeviceName(dev);
-                    return "" + fn;
+                    return "" + tup.Item1;
                 }).ToArray(),
                 showDropDownArrow: false,
                 onClick: contextMenuItemHandler);
 
             contextMenu.Items.Add(_deviceDropDownButton);
+
+            //var x = new ToolStripComboBox()
+            //{
+            //   Text = "D:Schlafzimmer",               
+            //};
+            //x.Items.AddRange(Options.Curr.GetDeviceTuples().Select((tup) =>
+            //{
+            //    return "" + tup.Item1;
+            //}).ToArray());
+            //contextMenu.Items.Add(x);
 
             ////////
 
@@ -131,7 +142,7 @@ namespace heos_remote_systray
             res.AutoToolTip = false;
             res.DropDownDirection = ToolStripDropDownDirection.Right;
             res.ShowDropDownArrow = showDropDownArrow;
-
+            
             foreach (var item in items)
             {
                 var itemButton = new ToolStripButton(text: item, image: null, onClick: onClick);
@@ -139,6 +150,34 @@ namespace heos_remote_systray
             }
 
             return res;
+        }
+
+        protected ToolStripMenuItem BuildContextSubMenu(
+            string rootName,
+            string[] items,
+            EventHandler? onClick,
+            bool showDropDownArrow = true)
+        {
+            var res = new ToolStripMenuItem();
+            res.Text = rootName;
+            res.DropDownItemClicked += (s6, e6) =>
+            {
+                if (onClick != null)
+                    onClick(s6, e6);
+            };
+
+            foreach (var item in items)
+            {
+                var itemButton = new ToolStripMenuItem(text: item);
+                res.DropDownItems.Add(item);
+            }
+
+            return res;
+        }
+
+        private void ItemButton_Click(object? sender, EventArgs e)
+        {
+            ;
         }
 
         async Task executeCommand(string cmd)
@@ -151,7 +190,7 @@ namespace heos_remote_systray
 
             // establish device
             // var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: Options.Curr.Device, debugLevel: 0)).FirstOrDefault();
-            var device = await ConnMgr.DiscoverOrGet(friedlyName: Options.Curr.Devices ?? "", debugLevel: 0);
+            var device = await ConnMgr.DiscoverOrGet(friedlyName: _activeDeviceName, debugLevel: 0);
             if (device?.Telnet == null)
             {
                 trayIcon.ShowBalloonTip(500, "HEOS Control", "No device found. Aborting!", ToolTipIcon.Info);
@@ -166,7 +205,7 @@ namespace heos_remote_systray
                 return;
             }
 
-            var (fn, ep) = HeosAppOptions.SplitDeviceName(Options.Curr.Devices);
+            var (fn, ep) = HeosAppOptions.SplitDeviceName(_activeDeviceName);
             int? pid = null;
             foreach (var pay in o1.payload)
                 if (pay.name.ToString() == fn)

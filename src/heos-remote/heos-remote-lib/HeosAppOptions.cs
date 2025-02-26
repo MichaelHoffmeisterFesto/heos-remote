@@ -49,6 +49,12 @@ namespace heos_remote_lib
             return new Tuple<string?, IPEndPoint?>(parts[0], IPEndPoint.Parse(parts[1]));
         }
 
+        public IEnumerable<Tuple<string?, IPEndPoint?>> GetDeviceTuples()
+        {
+            foreach (var dev in Devices)
+                yield return SplitDeviceName(dev);
+        }
+
         public IEnumerable<HeosContainerLocation> GetStartPoints()
         {
             if (StartCids != null)
