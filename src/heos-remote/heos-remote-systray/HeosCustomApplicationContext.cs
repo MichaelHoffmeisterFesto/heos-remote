@@ -37,6 +37,12 @@ namespace heos_remote_systray
 
         protected string _activeDeviceName = "XXX";
 
+        protected class TupleSenderIndex
+        {
+            public object? Sender;
+            public int Index;
+        }
+
         public HeosCustomApplicationContext()
         {
             // some inits
@@ -63,16 +69,6 @@ namespace heos_remote_systray
                 onClick: contextMenuItemHandler);
 
             contextMenu.Items.Add(_deviceDropDownButton);
-
-            //var x = new ToolStripComboBox()
-            //{
-            //   Text = "D:Schlafzimmer",               
-            //};
-            //x.Items.AddRange(Options.Curr.GetDeviceTuples().Select((tup) =>
-            //{
-            //    return "" + tup.Item1;
-            //}).ToArray());
-            //contextMenu.Items.Add(x);
 
             ////////
 
@@ -127,31 +123,6 @@ namespace heos_remote_systray
             trayIcon.DoubleClick += new System.EventHandler(trayIcon_DoubleClick);
         }
 
-        protected ToolStripDropDownButton BuildContextMenuDropDown(
-            string rootName,
-            string[] items,
-            EventHandler? onClick,
-            bool showDropDownArrow = true)
-        {
-            var res = new ToolStripDropDownButton();
-            var dropDown = new ToolStripDropDown() { DropShadowEnabled = false };
-            res.Text = rootName;
-
-            res.Margin = new Padding(2, 8, 2, 2);
-            res.DropDown = dropDown;
-            res.AutoToolTip = false;
-            res.DropDownDirection = ToolStripDropDownDirection.Right;
-            res.ShowDropDownArrow = showDropDownArrow;
-            
-            foreach (var item in items)
-            {
-                var itemButton = new ToolStripButton(text: item, image: null, onClick: onClick);
-                dropDown.Items.Add(item);
-            }
-
-            return res;
-        }
-
         protected ToolStripMenuItem BuildContextSubMenu(
             string rootName,
             string[] items,
@@ -166,18 +137,15 @@ namespace heos_remote_systray
                     onClick(s6, e6);
             };
 
-            foreach (var item in items)
-            {
-                var itemButton = new ToolStripMenuItem(text: item);
-                res.DropDownItems.Add(item);
-            }
+            for (int i = 0; i < items.Length; i++)
+                res.DropDownItems.Add(
+                    new ToolStripMenuItem(text: items[i]) { 
+                        Tag = new TupleSenderIndex() { 
+                            Sender = res, 
+                            Index = i } 
+                    });
 
             return res;
-        }
-
-        private void ItemButton_Click(object? sender, EventArgs e)
-        {
-            ;
         }
 
         async Task executeCommand(string cmd)
@@ -521,6 +489,25 @@ namespace heos_remote_systray
 
         async void contextMenuItemHandler(object? sender, EventArgs e)
         {
+            // special cases first
+            if (sender == _deviceDropDownButton && e is ToolStripItemClickedEventArgs ece
+                && ece.ClickedItem?.Tag is TupleSenderIndex tsi)
+            {
+                var dts = Options.Curr.GetDeviceTuples().ToList();
+                if (tsi.Index >= 0 && tsi.Index < dts.Count())
+                {
+                    // set active device
+                    _activeDeviceName = dts[tsi.Index].Item1 ?? "";
+
+                    // visually indicate
+                    if (_deviceDropDownButton != null)
+                        _deviceDropDownButton.Text = "D:" + _activeDeviceName;
+                }
+                return;
+            }
+
+            // general
+
             if (sender is ToolStripMenuItem tsmi)
             {
                 // check for command
