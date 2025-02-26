@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "heos-remote-ctl": {
-      "commandName": "Project",
-      "commandLineArgs": "-d Schlafzimmer"
-    }
-  }
-}

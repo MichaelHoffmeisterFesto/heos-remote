@@ -355,7 +355,7 @@ namespace heos_remote_systray
             {
                 // ask for current
                 List<Tuple<string, string>>? nowPlay = new();
-                string imgUrl = null;
+                string imgUrl = "";
                 try
                 {
                     var output = await device.Telnet.SendCommandAsync($"heos://player/get_now_playing_media?pid={pid}\r\n");
@@ -430,7 +430,7 @@ namespace heos_remote_systray
                             return;
                         }
                     }
-                    else if (item?.IsContainer == true)
+                    else if (item?.IsContainer == true && parentLoc != null)
                     {
                         // add container to queue
                         var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={item.Cid}\r\n");
@@ -443,7 +443,7 @@ namespace heos_remote_systray
                     }
                     else if (item?.Mid?.HasContent() == true)
                     {
-                        if (item.Type == "station")
+                        if (item.Type == "station" && parentLoc != null)
                         {
                             // play the stream (is not a track)
                             var o5 = await device.Telnet.SendCommandAsync($"heos://browse/play_stream?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&mid={item.Mid}&name={item.Name}\r\n");
@@ -453,7 +453,7 @@ namespace heos_remote_systray
                                 return;
                             }
                         }
-                        else
+                        else if (parentLoc != null)
                         {
                             // add track to queue
                             var o5 = await device.Telnet.SendCommandAsync($"heos://browse/add_to_queue?pid={pid}&sid={parentLoc.Sid}&cid={parentLoc.Cid}&mid={item.Mid}&aid={action}\r\n");

@@ -10,8 +10,15 @@
     <ApplicationIcon>heos_remote_icon_I5p_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup>
+	  <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+	  <AssemblyVersion>$(Version)</AssemblyVersion>
+	  <FileVersion>$(Version)</FileVersion>
+	  <InformationalVersion>$(Version)</InformationalVersion>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Content Include="heos_remote_icon_I5p_icon.ico" />
+	  <Content Include="heos_remote_icon_I5p_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>

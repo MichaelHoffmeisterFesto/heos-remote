@@ -63,6 +63,16 @@ namespace heos_remote_systray
                     din.Nodes.Add($"Manufacturer: {devInfo.Manufacturer}");
                     din.ExpandAll();
 
+                    if (true)
+                    {
+                        var ver = System.Reflection.Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString() ?? "(unknown)";
+                        var app = treeXml.Nodes.Add("#this-app");
+                        app.Nodes.Add($"(C) 2025 by: Michael Hoffmeister");
+                        app.Nodes.Add($"License: MIT");
+                        app.Nodes.Add($"Version: {ver}");
+                        app.ExpandAll();
+                    }
+
                     // now playing?
                     if (nowPlay != null && nowPlay.Count > 0)
                     {

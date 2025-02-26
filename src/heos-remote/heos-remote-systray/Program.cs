@@ -1,6 +1,7 @@
 using CommandLine;
 using CommandLine.Text;
 using heos_remote_lib;
+using System.Reflection;
 
 namespace heos_remote_systray
 {
@@ -29,13 +30,14 @@ namespace heos_remote_systray
             var parser = new Parser(config => {
                 config.HelpWriter = null;
             });
-            var result = parser.ParseArguments<HeosAppOptions>(args);
+            var result = parser.ParseArguments<HeosAppOptions>(args);                            
 
             if (result.Value == null)
             {
+                var ver = System.Reflection.Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString() ?? "(unknown)";
                 Console.WriteLine(HelpText.AutoBuild(result, h => {
                     h.AdditionalNewLineAfterOption = false;
-                    h.Heading = "heos-remote-systray"; //change header
+                    h.Heading = "heos-remote-systray" + ver; //change header
                     h.Copyright = "(C) 2025 by Michael Hoffmeister. MIT license."; //change copyright text
                     return h;
                 }));
