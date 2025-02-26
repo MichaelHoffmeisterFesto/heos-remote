@@ -59,9 +59,8 @@ namespace heos_remote_systray
                 else
                     doc.Load("");
             }
-            catch (Exception err)
+            catch
             {
-
                 return;
             }
 

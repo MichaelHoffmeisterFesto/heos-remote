@@ -20,7 +20,7 @@ namespace heos_remote_lib
         public async Task<HeosSearchCriteriaList?> Acquire(HeosConnectedItem ci, int sid)
         {
             // access
-            if (!ci.IsValid())
+            if (ci?.Telnet == null || !ci.IsValid())
                 return null;
 
             // get

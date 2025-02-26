@@ -208,9 +208,8 @@ namespace heos_remote_lib
                                 var uri = new Uri(xmlLocation ?? "");
                                 item.Host = uri.Host;
                                 item.Port = HeosTelnet.DefaultPort;
-                            } catch (Exception ex)
+                            } catch
                             {
-                                ;
                             }
 
                             // do a specific search?

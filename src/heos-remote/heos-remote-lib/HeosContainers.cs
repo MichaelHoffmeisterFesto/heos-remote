@@ -24,7 +24,7 @@ namespace heos_remote_lib
         public async Task<HeosContainerList?> Acquire(HeosConnectedItem ci, int sid, string cid)
         {
             // access
-            if (!ci.IsValid())
+            if (ci?.Telnet == null || !ci.IsValid())
                 return null;
 
             // get

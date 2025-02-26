@@ -51,7 +51,11 @@ jobs:
     - name: Publish
       run: dotnet publish -c Release -o ./publish
 
-
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: WinForms-Application
+        path: ./src/heos-remote
 
     # # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     # - name: Setup MSBuild.exe

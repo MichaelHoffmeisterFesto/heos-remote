@@ -37,7 +37,7 @@ namespace heos_remote_lib
         public async Task<HeosSongQueue?> Acquire(HeosConnectedItem ci, int pid)
         {
             // access
-            if (!ci.IsValid())
+            if (ci?.Telnet == null || !ci.IsValid())
                 return null;
 
             CurrentQid = "";

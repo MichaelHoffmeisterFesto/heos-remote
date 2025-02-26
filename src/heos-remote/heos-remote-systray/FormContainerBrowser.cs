@@ -22,7 +22,7 @@ namespace heos_remote_systray
 
         public List<HeosContainerLocation>? StartingPoints = null;
 
-        public HeosContainerLocation CurrentLocation;
+        public HeosContainerLocation CurrentLocation = new();
 
         public Func<Task<HeosSongQueue?>>? LambdaLoadSongQueue = null;
 
@@ -92,7 +92,7 @@ namespace heos_remote_systray
                     if (ndx < 0 || ndx >= _containerItems.Count)
                         return;
                     cbi = (_containersSource[ndx] as ContainerBrowserItem)?.Copy();
-                    if (cbi.DisplayImageUrl?.HasContent() != true)
+                    if (cbi?.DisplayImageUrl?.HasContent() != true)
                         return;
                 }
 

@@ -21,7 +21,7 @@ namespace heos_remote_lib
         public async Task<HeosMusicSourceList?> Acquire(HeosConnectedItem ci, bool onlyValid = false)
         {
             // access
-            if (!ci.IsValid())
+            if (ci?.Telnet == null || !ci.IsValid())
                 return null;
 
             // get
