@@ -61,6 +61,7 @@ namespace heos_remote_systray
                     din.Nodes.Add($"Host: {devInfo.Host}");
                     din.Nodes.Add($"Location: {devInfo.Location}");
                     din.Nodes.Add($"Manufacturer: {devInfo.Manufacturer}");
+                    din.ExpandAll();
 
                     // now playing?
                     if (nowPlay != null && nowPlay.Count > 0)
@@ -68,6 +69,7 @@ namespace heos_remote_systray
                         var npn = treeXml.Nodes.Add("#now-playing");
                         foreach (var np in nowPlay)
                             npn.Nodes.Add($"{np.Item1}: {np.Item2}");
+                        npn.ExpandAll();
                     }
 
                     // prepare later add of xml nodes

@@ -2,7 +2,7 @@
   "profiles": {
     "heos-remote-systray": {
       "commandName": "Project",
-      "commandLineArgs": "-d \"Schlafzimmer|192.168.178.138\" \"Dining room|192.168.178.122\" \"Office|192.168.178.111\" -u \"michahofft2@googlemail.com\" -p \"Enter1$3\" --cids \"Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten\""
+      "commandLineArgs": "-d \"Schlafzimmer\" \"Dining Room\" \"Office|192.168.178.111\" -g \"Single rooms|1|2\" \"All rooms|1,2\" -u \"michahofft2@googlemail.com\" -p \"Enter1$3\" --cids \"Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten\""
     }
   }
 }

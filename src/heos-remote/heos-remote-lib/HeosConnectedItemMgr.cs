@@ -30,19 +30,17 @@ namespace heos_remote_lib
         public int RenewalSecs = 60;
 
         public async Task<HeosConnectedItem?> DiscoverOrGet(
-            string friedlyName,
+            HeosDeviceConfig? deviceConfig,
             int debugLevel = 0,
             int timeOutMs = 3000,
             string? interfaceName = null)
         {
             // access
-            if (!friedlyName.HasContent())
+            if (deviceConfig == null || deviceConfig.FriendlyName?.HasContent() != true)
                 return null;
 
-            // split 
-            var (fn, ep) = HeosAppOptions.SplitDeviceName(friedlyName);
-            if (fn == null)
-                return null;
+            var fn = deviceConfig.FriendlyName;
+            var ep = deviceConfig.EndPoint;
 
             // check if a connection is already stored and young enough
             if (this.ContainsKey(fn))
@@ -87,7 +85,7 @@ namespace heos_remote_lib
             {
                 // make new discovery
                 newDi = (await HeosDiscovery.DiscoverItems(
-                    firstFriedlyName: friedlyName,
+                    firstFriedlyName: fn,
                     debugLevel: debugLevel,
                     timeOutMs: timeOutMs,
                     interfaceName: interfaceName))?.FirstOrDefault();

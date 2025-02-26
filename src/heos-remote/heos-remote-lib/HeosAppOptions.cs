@@ -8,10 +8,25 @@ using CommandLine;
 
 namespace heos_remote_lib
 {
+    /// <summary>
+    /// Device information prodided by the options
+    /// </summary>
+    public class HeosDeviceConfig
+    {
+        public string FriendlyName = "";
+        public IPEndPoint? EndPoint = null;
+    }
+
+    /// <summary>
+    /// Set of options to be changed by command line parsing
+    /// </summary>
     public class HeosAppOptions
     {
         [Option('d', "device", Required = true, HelpText = "Sequence of one to many friedly name of HEOS device(s). Each may be of format name|host:port to disable auto discovery.")]
         public IEnumerable<string> Devices { get; set; } = Enumerable.Empty<string>();
+
+        [Option('g', "group", Required = false, HelpText = "Sequence of zero to many group definitions. Each is of format Name|<index>,..,<index>|..|<index>,..,<index>|, with <index> being 1-based device indices.")]
+        public IEnumerable<string> Groups { get; set; } = Enumerable.Empty<string>();
 
         [Option('m', "manufacturer", Required = false, HelpText = "Manufacturer name of HEOS device; first device will be taken.")]
         public string? Manufacturer { get; set; }
@@ -34,25 +49,29 @@ namespace heos_remote_lib
         [Option("cids", HelpText = "Sequence of tuples, which are starting points for containers. Format name|sid|cid." )]
         public IEnumerable<string> StartCids { get; set; } = Enumerable.Empty<string>();
 
-        public static Tuple<string?, IPEndPoint?> SplitDeviceName(string? deviceName)
+        public static HeosDeviceConfig? SplitDeviceName(string? deviceName)
         {
             // access
             if (deviceName?.HasContent() != true)
-                return new Tuple<string?, IPEndPoint?>(null, null);
+                return null;
 
             // split?
             var parts = deviceName.Split('|');
             if (parts.Length != 2)
-                return new Tuple<string?, IPEndPoint?>(parts[0], null);
+                return new HeosDeviceConfig() { FriendlyName = parts[0] };
             
             // 2 parts
-            return new Tuple<string?, IPEndPoint?>(parts[0], IPEndPoint.Parse(parts[1]));
+            return new HeosDeviceConfig() { FriendlyName = parts[0], EndPoint = IPEndPoint.Parse(parts[1]) };
         }
 
-        public IEnumerable<Tuple<string?, IPEndPoint?>> GetDeviceTuples()
+        public IEnumerable<HeosDeviceConfig> GetDeviceConfigs()
         {
             foreach (var dev in Devices)
-                yield return SplitDeviceName(dev);
+            {
+                var ds = SplitDeviceName(dev);
+                if (ds != null)
+                    yield return ds;
+            }
         }
 
         public IEnumerable<HeosContainerLocation> GetStartPoints()

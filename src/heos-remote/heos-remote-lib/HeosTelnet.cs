@@ -35,8 +35,8 @@ namespace heos_remote_lib
             using var client = new TcpClient();
             await client.ConnectAsync(_host, _port);
             using var stream = client.GetStream();
-            using var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
-            using var reader = new StreamReader(stream, Encoding.ASCII);
+            using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
+            using var reader = new StreamReader(stream, Encoding.UTF8);
             stream.ReadTimeout = 20000;
 
             // Send the command
@@ -45,18 +45,33 @@ namespace heos_remote_lib
             // may loop
             while (true)
             {
-
                 // Read response
                 var sb = new StringBuilder();
+                int braces = 0;
                 try
                 {
                     while (true || !reader.EndOfStream)
                     {
+                        // get a line
                         var line = reader.ReadLine();
                         if (line == null)
                             break;
+                        if (line.Trim() == "")
+                            continue;
                         sb.AppendLine(line);
-                        if (line?.TrimEnd() == "}")
+
+                        // investigate the level of opening and closing braces
+                        // Note: I was not able to figure out another (better) indication, when
+                        // the datagramm was fully received.
+                        foreach (var c in line)
+                        {
+                            if (c == '{') braces++;
+                            if (c == '}') braces--;
+                        }
+
+                        // this means: the first non-empty line has to contain a '{', or the
+                        // algo will directly return!!
+                        if (braces == 0)
                             break;
                     }
                 }

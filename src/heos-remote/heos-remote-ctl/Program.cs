@@ -19,7 +19,9 @@ namespace heos_remote_ctl
                 Console.WriteLine("heos-remote-ctl (c) 2025 by Michael Hoffmeister, MIT license.");
 
             // find a device
-            var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: options.GetDeviceTuples()?.FirstOrDefault()?.Item1, debugLevel: 2)).FirstOrDefault();
+            var device = (await HeosDiscovery.DiscoverItems(
+                    firstFriedlyName: options.GetDeviceConfigs()?.FirstOrDefault()?.FriendlyName, 
+                    debugLevel: 2)).FirstOrDefault();
             if (device == null)
             {
                 Console.Error.WriteLine("No device found. Aborting!");

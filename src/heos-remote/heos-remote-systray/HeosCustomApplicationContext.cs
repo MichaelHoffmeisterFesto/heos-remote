@@ -34,8 +34,12 @@ namespace heos_remote_systray
         protected List<HeosContainerLocation> _currentHistory = new List<HeosContainerLocation>();
 
         protected ToolStripMenuItem? _deviceDropDownButton = null;
+        protected ToolStripMenuItem? _groupDropDownButton = null;
 
-        protected string _activeDeviceName = "XXX";
+        protected HeosDeviceConfig? _activeDevice = null;
+
+        protected List<HeosDeviceConfig> _deviceConfigs = new();
+        protected List<HeosGroupConfig> _groupConfigs = new();
 
         protected class TupleSenderIndex
         {
@@ -50,7 +54,7 @@ namespace heos_remote_systray
             if (startCnt != null)
                 _currentBrowseLocation = startCnt.Copy();
 
-            _activeDeviceName = "" + Options.Curr.GetDeviceTuples().FirstOrDefault()?.Item1;
+            _activeDevice = Options.Curr.GetDeviceConfigs()?.FirstOrDefault();
 
             // configure context menu
             contextMenu = new ContextMenuStrip()
@@ -59,16 +63,40 @@ namespace heos_remote_systray
 
             ////////
 
+            _deviceConfigs = Options.Curr.GetDeviceConfigs().ToList();
+
             _deviceDropDownButton = BuildContextSubMenu(
-                "D:Schlafzimmer",
-                Options.Curr.GetDeviceTuples().Select((tup) =>
-                {
-                    return "" + tup.Item1;
-                }).ToArray(),
+                "D:" + ((_activeDevice != null) ? _activeDevice.FriendlyName : "(not available)"),
+                _deviceConfigs.Select((tup) => "" + tup.FriendlyName).ToArray(),
                 showDropDownArrow: false,
                 onClick: contextMenuItemHandler);
 
             contextMenu.Items.Add(_deviceDropDownButton);
+
+            contextMenu.Items.Add(new ToolStripSeparator());
+
+            ////////
+
+            _groupConfigs = new();
+            foreach (var gcstr in Options.Curr.Groups)
+            {
+                var gc = new HeosGroupConfig(gcstr, _deviceConfigs.Count);
+                if (gc.IsValid())
+                    _groupConfigs.Add(gc);
+            }
+
+            if (_groupConfigs.Count > 0)
+            {
+                _groupDropDownButton = BuildContextSubMenu(
+                "G:All groups",
+                _groupConfigs.Select((gc) => "" + gc.Name).ToArray(),
+                showDropDownArrow: false,
+                onClick: contextMenuItemHandler);
+
+                contextMenu.Items.Add(_groupDropDownButton);
+
+                contextMenu.Items.Add(new ToolStripSeparator());
+            }
 
             ////////
 
@@ -158,7 +186,7 @@ namespace heos_remote_systray
 
             // establish device
             // var device = (await HeosDiscovery.DiscoverItems(firstFriedlyName: Options.Curr.Device, debugLevel: 0)).FirstOrDefault();
-            var device = await ConnMgr.DiscoverOrGet(friedlyName: _activeDeviceName, debugLevel: 0);
+            var device = await ConnMgr.DiscoverOrGet(deviceConfig: _activeDevice, debugLevel: 0);
             if (device?.Telnet == null)
             {
                 trayIcon.ShowBalloonTip(500, "HEOS Control", "No device found. Aborting!", ToolTipIcon.Info);
@@ -173,10 +201,11 @@ namespace heos_remote_systray
                 return;
             }
 
-            var (fn, ep) = HeosAppOptions.SplitDeviceName(_activeDeviceName);
+            // find it in the reported players list!!
             int? pid = null;
             foreach (var pay in o1.payload)
-                if (pay.name.ToString() == fn)
+                if (_activeDevice?.FriendlyName != null && 
+                    _activeDevice.FriendlyName.Equals(pay.name.ToString(), StringComparison.InvariantCultureIgnoreCase))
                     pid = pay.pid;
 
             if (!pid.HasValue)
@@ -311,7 +340,7 @@ namespace heos_remote_systray
                 // index
                 string input = "inputs/aux_in_1";
                 if (cmd == "SPDIF In") input = "inputs/optical_in_1";
-                if (cmd == "HDMI In") input = "inputs/hdmi_in_1";
+                if (cmd == "HDMI In") input = "inputs/hdmi_arc_1";
 
                 // select
                 var output = await device.Telnet.SendCommandAsync($"heos://browse/play_input?pid={pid}&input={input}\r\n");
@@ -493,15 +522,31 @@ namespace heos_remote_systray
             if (sender == _deviceDropDownButton && e is ToolStripItemClickedEventArgs ece
                 && ece.ClickedItem?.Tag is TupleSenderIndex tsi)
             {
-                var dts = Options.Curr.GetDeviceTuples().ToList();
+                var dts = Options.Curr.GetDeviceConfigs().ToList();
                 if (tsi.Index >= 0 && tsi.Index < dts.Count())
                 {
                     // set active device
-                    _activeDeviceName = dts[tsi.Index].Item1 ?? "";
+                    _activeDevice = dts[tsi.Index];
 
                     // visually indicate
                     if (_deviceDropDownButton != null)
-                        _deviceDropDownButton.Text = "D:" + _activeDeviceName;
+                        _deviceDropDownButton.Text = "D:" + _activeDevice.FriendlyName;
+                }
+                return;
+            }
+
+            if (sender == _groupDropDownButton && e is ToolStripItemClickedEventArgs ece2
+                && ece2.ClickedItem?.Tag is TupleSenderIndex tsi2)
+            {
+                if (_groupConfigs != null && tsi2.Index >= 0 && tsi2.Index < _groupConfigs.Count())
+                {
+                    // get the device
+                    var device = await ConnMgr.DiscoverOrGet(deviceConfig: _activeDevice, debugLevel: 0);
+                    if (device?.Telnet == null)
+                        return;
+
+                    // do it
+                    await _groupConfigs[tsi2.Index].Execute(device);
                 }
                 return;
             }
