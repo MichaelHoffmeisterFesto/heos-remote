@@ -20,7 +20,12 @@ jobs:
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
-      Solution_Name: src/heos-remote/heos-remote.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
+    #  Solution_Name: src/heos-remote/heos-remote.sln                         # Replace with your solution name, i.e. MyWpfApp.sln.
+
+    defaults:
+      run:
+    #    shell: bash
+        working-directory: ./src/heos-remote
 
     steps:
     - name: Checkout
