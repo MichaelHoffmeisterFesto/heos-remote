@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "heos-remote-ctl", "heos-remote-ctl\heos-remote-ctl.csproj", "{BA2BE0DF-90F7-4353-8838-9D464C4E1115}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "heos-remote-systray", "heos-remote-systray\heos-remote-systray.csproj", "{A3E9C060-C0D8-4142-859D-B424E7F516A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "heos-remote-systray", "heos-remote-systray\heos-remote-systray.csproj", "{A3E9C060-C0D8-4142-859D-B424E7F516A6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "heos-remote-lib", "heos-remote-lib\heos-remote-lib.csproj", "{C4EFDCD4-A3B7-4590-BE4C-6B62F7572D82}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "heos-remote-lib", "heos-remote-lib\heos-remote-lib.csproj", "{C4EFDCD4-A3B7-4590-BE4C-6B62F7572D82}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BA2BE0DF-90F7-4353-8838-9D464C4E1115}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA2BE0DF-90F7-4353-8838-9D464C4E1115}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BA2BE0DF-90F7-4353-8838-9D464C4E1115}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BA2BE0DF-90F7-4353-8838-9D464C4E1115}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A3E9C060-C0D8-4142-859D-B424E7F516A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A3E9C060-C0D8-4142-859D-B424E7F516A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3E9C060-C0D8-4142-859D-B424E7F516A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
