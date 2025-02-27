@@ -46,6 +46,9 @@ namespace heos_remote_lib
         [Option('p', "password", Required = false, HelpText = "Password of the HEOS account (cleartext, sigh!).")]
         public string? Password { get; set; }
 
+        [Option('k', "key-map", Required = false, HelpText = "Create system-wide global keyboard shortcut. Format e.g. Play|Control+Shift+F8.")]
+        public IEnumerable<string> KeyMap { get; set; } = Enumerable.Empty<string>();
+
         [Option("cids", HelpText = "Sequence of tuples, which are starting points for containers. Format name|sid|cid." )]
         public IEnumerable<string> StartCids { get; set; } = Enumerable.Empty<string>();
 

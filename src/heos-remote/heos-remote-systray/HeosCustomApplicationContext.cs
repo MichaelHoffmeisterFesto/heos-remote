@@ -17,6 +17,7 @@ using Options = heos_remote_systray.OptionsSingleton;
 using static System.Windows.Forms.Design.AxImporter;
 using Newtonsoft.Json.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Menu;
+using System.Reflection.Emit;
 
 namespace heos_remote_systray
 {
@@ -46,6 +47,10 @@ namespace heos_remote_systray
             public object? Sender;
             public int Index;
         }
+
+        protected KeyboardHook? _hook = null;
+
+        protected HeosKeyMapList? _mappedKeys = null;
 
         public HeosCustomApplicationContext()
         {
@@ -149,6 +154,29 @@ namespace heos_remote_systray
 
             trayIcon.Click += new System.EventHandler(trayIcon_Click);
             trayIcon.DoubleClick += new System.EventHandler(trayIcon_DoubleClick);
+
+            //////// Keyboard?
+            if (Options.Curr.KeyMap.Count() > 0)
+            {
+                _hook = new KeyboardHook();
+
+                _mappedKeys = HeosKeyMapList.ParseKeyMappings(Options.Curr.KeyMap);
+
+                _hook.KeyPressed +=
+                    new EventHandler<KeyPressedEventArgs>(hook_KeyPressed);
+
+                foreach (var mk in _mappedKeys)
+                    _hook.RegisterHotKey(mk.Modifiers, mk.Key);
+            }
+        }
+
+        async void hook_KeyPressed(object? sender, KeyPressedEventArgs e)
+        {
+            await Task.Yield();
+            var key = _mappedKeys?.FindKey(e.Modifier, e.Key);
+            if (key == null)
+                return;
+            await executeCommand(key.Function);
         }
 
         protected ToolStripMenuItem BuildContextSubMenu(

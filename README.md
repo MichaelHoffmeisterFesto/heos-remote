@@ -34,6 +34,7 @@ Manual configuration is possible:
 The utility does not use registry nor configuration files. The configuration is solely done by command-line parameters.
 This limits the configrability of the tool.
 It is currently not possible to start the utility without command-line parameters, therefore simply double-click to the .exe does not work.
+The command line may contain single quotes, double quotes are difficult because of PowerShell string interpolation.
 
 The syntax is as follow (help screen):
 ```
@@ -52,16 +53,25 @@ heos-remote-systray
   -t, --time-out        Time-out in [ms].
   -u, --username        Username of the HEOS account (cleartext).
   -p, --password        Password of the HEOS account (cleartext, sigh!).
+  -k, --key-map         Create system-wide global keyboard shortcut. Format e.g.
+                        Play|Control+Shift+F8.
   --cids                Sequence of tuples, which are starting points for
                         containers. Format name|sid|cid.
   --help                Display this help screen.
   --version             Display version information.
 ```
 
+### Keyboard shortcuts
+Note: Some key-combinations fail to register, such as "Control+Alt+F12". Do not know why.
+Functions shall be sub-strings of this string:
+```
+Toggle Info Play Pause Next Prev Fav 1 Fav 2 Fav 3 Aux In SPDIF In HDMI In Vol + Vol - Play URL Browse
+```
+
 ### Sample command-line
 
 ```
-.\heos-remote-systray.exe -d 'Bedroom' 'Dining Room' 'Office|192.168.178.111' -g 'Single rooms|1|2' 'All rooms|1,2' -u 'user@example.com' -p 'MySecret' --cids 'Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten'
+.\heos-remote-systray.exe -d 'Bedroom' 'Dining Room' 'Office|192.168.178.111' -g 'Single rooms|1|2' 'All rooms|1,2' -u 'user@example.com' -p 'MySecret' --cids 'Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten' -k 'Vol -|Control+Shift+F9' 'Vol +|Control+Shift+F10'  'Next|Control+Shift+F11' 'Toggle|Control+Shift+F12'
 ```
 
 These options:
