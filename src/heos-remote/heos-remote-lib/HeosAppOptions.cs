@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
+using Newtonsoft.Json;
 
 namespace heos_remote_lib
 {
@@ -22,7 +23,7 @@ namespace heos_remote_lib
     /// </summary>
     public class HeosAppOptions
     {
-        [Option('d', "device", Required = true, HelpText = "Sequence of one to many friedly name of HEOS device(s). Each may be of format name|host:port to disable auto discovery.")]
+        [Option('d', "device", Required = false, HelpText = "Sequence of one to many friedly name of HEOS device(s). Each may be of format name|host:port to disable auto discovery.")]
         public IEnumerable<string> Devices { get; set; } = Enumerable.Empty<string>();
 
         [Option('g', "group", Required = false, HelpText = "Sequence of zero to many group definitions. Each is of format Name|<index>,..,<index>|..|<index>,..,<index>|, with <index> being 1-based device indices.")]
@@ -51,6 +52,25 @@ namespace heos_remote_lib
 
         [Option("cids", HelpText = "Sequence of tuples, which are starting points for containers. Format name|sid|cid." )]
         public IEnumerable<string> StartCids { get; set; } = Enumerable.Empty<string>();
+
+        [Option('j', "read-json", Required = false, HelpText = "Path to configuration options in JSON format.")]
+        public string? ReadJsonFile { get; set; }
+
+        /// <summary>
+        /// Will read options from a file into the given instance.
+        /// </summary>
+        public static void ReadJson(string fn, HeosAppOptions optionsInformation)
+        {
+            try
+            {
+                var jsonStr = System.IO.File.ReadAllText(fn);
+                JsonConvert.PopulateObject(jsonStr, optionsInformation);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("When reading options JSON file: {0}", ex.Message.ToString());
+            }
+        }
 
         public static HeosDeviceConfig? SplitDeviceName(string? deviceName)
         {

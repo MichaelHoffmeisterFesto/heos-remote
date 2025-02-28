@@ -31,12 +31,14 @@ Manual configuration is possible:
 ```
 
 ### Configuration
-The utility does not use registry nor configuration files. The configuration is solely done by command-line parameters.
-This limits the configrability of the tool.
+The utility does not use registry. The configuration is done by command-line parameters or by json-files.
+By utility loads, if existing, the JSON file `heos-remote-systray.options.json` from the executable's path.
+By command-line parameter `-j, --read-json`, the loading of an arbitrary file can be specified, as well.
+It is not recommended to store the credentials in the JSON file.
 It is currently not possible to start the utility without command-line parameters, therefore simply double-click to the .exe does not work.
 The command line may contain single quotes, double quotes are difficult because of PowerShell string interpolation.
 
-The syntax is as follow (help screen):
+The syntax of the command line parameters is as follow (help screen):
 ```
 heos-remote-systray
 (C) 2025 by Michael Hoffmeister. MIT license.
@@ -72,6 +74,34 @@ Toggle Info Play Pause Next Prev Fav 1 Fav 2 Fav 3 Aux In SPDIF In HDMI In Vol +
 
 ```
 .\heos-remote-systray.exe -d 'Bedroom' 'Dining Room' 'Office|192.168.178.111' -g 'Single rooms|1|2' 'All rooms|1,2' -u 'user@example.com' -p 'MySecret' --cids 'Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten' -k 'Vol -|Control+Shift+F9' 'Vol +|Control+Shift+F10'  'Next|Control+Shift+F11' 'Toggle|Control+Shift+F12'
+```
+
+Sample JSON file for options:
+```
+{
+  "Devices": [
+    "Bedroom",
+    "Dining Room",
+    "Office|192.168.178.111"
+  ],
+  "Groups": [
+    "Single rooms|1|2",
+    "All rooms|1,2"
+  ],
+  // Recommendation: Be careful! If in doubt, set username, Password via commandline options
+  // in order to not expose secrets via Github
+  // "Username": "user@example.com",
+  // "Password": "MySecret",
+  "StartCids": [
+    "Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten"
+  ],
+  "KeyMap": [
+    "Vol -|Control+Shift+F9",
+    "Vol +|Control+Shift+F10",
+    "Next|Control+Shift+F11",
+    "Toggle|Control+Shift+F12"
+  ]
+}
 ```
 
 These options:

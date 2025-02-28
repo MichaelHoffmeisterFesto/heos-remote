@@ -1,0 +1,24 @@
+﻿{
+  "Devices": [
+    "Schlafzimmer",
+    "Dining Room",
+    "Office|192.168.178.111"
+  ],
+  "Groups": [
+    "Single rooms|1|2",
+    "All rooms|1,2"
+  ],
+  // Recommendation: Be careful! If in doubt, set username, Password via commandline options
+  // in order to not expose secrets via Github
+  // "Username": "user@example.com",
+  // "Password": "MySecret",
+  "StartCids": [
+    "Amazon playlists|13|library/playlists/#library_playlists-NAME-Playlisten"
+  ],
+  "KeyMap": [
+    "Vol -|Control+Shift+F9",
+    "Vol +|Control+Shift+F10",
+    "Next|Control+Shift+F11",
+    "Toggle|Control+Shift+F12"
+  ]
+}
