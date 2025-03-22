@@ -1,7 +1,8 @@
 {
   "profiles": {
     "heos-remote-systray": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-u \"michahofft2@googlemail.com\" -p \"Enter1$3\""
     }
   }
 }

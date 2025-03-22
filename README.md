@@ -35,7 +35,6 @@ The utility does not use registry. The configuration is done by command-line par
 By utility loads, if existing, the JSON file `heos-remote-systray.options.json` from the executable's path.
 By command-line parameter `-j, --read-json`, the loading of an arbitrary file can be specified, as well.
 It is not recommended to store the credentials in the JSON file.
-It is currently not possible to start the utility without command-line parameters, therefore simply double-click to the .exe does not work.
 The command line may contain single quotes, double quotes are difficult because of PowerShell string interpolation.
 
 The syntax of the command line parameters is as follow (help screen):
