@@ -33,7 +33,8 @@ namespace heos_remote_lib
             HeosDeviceConfig? deviceConfig,
             int debugLevel = 0,
             int timeOutMs = 3000,
-            string? interfaceName = null)
+            string? interfaceName = null,
+            bool androidMode = false)
         {
             // access
             if (deviceConfig == null || deviceConfig.FriendlyName?.HasContent() != true)
@@ -88,7 +89,8 @@ namespace heos_remote_lib
                     firstFriedlyName: fn,
                     debugLevel: debugLevel,
                     timeOutMs: timeOutMs,
-                    interfaceName: interfaceName))?.FirstOrDefault();
+                    interfaceName: interfaceName,
+                    androidMode: androidMode))?.FirstOrDefault();
             }
             if (newDi == null)
                 return null;

@@ -67,18 +67,55 @@ namespace heos_remote_systray
             return true;
         }
 
-        public async Task<bool> Execute(HeosConnectedItem device)
+        public async Task<bool> Execute(
+            List<HeosDeviceConfig> deviceConfig, 
+            HeosConnectedItem activeDevice,
+            bool unGroup = false)
         {
             // access
-            if (device?.Telnet == null)
+            if (deviceConfig == null || deviceConfig.Count < 1 || activeDevice?.Telnet == null)
                 return false;
 
             // find all players
-            var o1 = await device.Telnet.SendCommandAsync("heos://player/get_players\r\n");
+            var o1 = await activeDevice.Telnet.SendCommandAsync("heos://player/get_players\r\n");
             if (!HeosTelnet.IsSuccessCode(o1))
                 return false;
 
-            // all groups
+            // un-bind all groups?
+            if (unGroup)
+            {
+                // get all groups
+                var o2 = await activeDevice.Telnet.SendCommandAsync("heos://group/get_groups\r\n");
+                if (!HeosTelnet.IsSuccessCode(o1))
+                    return false;
+
+                // go into that groups
+                foreach (var plgrp in o2.payload)
+                {
+                    int? leadPid = null;
+                    foreach (var player in plgrp.players)
+                    {
+                        if (player == null)
+                            continue;
+                        string? roleName = player.role?.ToString();
+                        if (roleName?.Equals("leader", StringComparison.InvariantCultureIgnoreCase) == true)
+                        {
+                            int ii = player.pid;
+                            leadPid = ii;
+                        }
+                    }
+
+                    // ungroup leader in order to "free" all others
+                    if (leadPid.HasValue)
+                    {
+                        var o4 = await activeDevice.Telnet.SendCommandAsync($"heos://group/set_group?pid={leadPid.Value}\r\n");
+                        if (!HeosTelnet.IsSuccessCode(o4))
+                            return false;
+                    }
+                }
+            }
+
+            // build new groups
             foreach (var indexList in Index)
             {
                 // access
@@ -89,21 +126,34 @@ namespace heos_remote_systray
                 var pids = new List<int>();
                 foreach (var ndx1 in indexList)
                 {
-                    // was 1-based
+                    // index is 1-based and indexes the devices as seen by the user!
+                    // need the friendly name
                     var ndx = ndx1 - 1;
-                    if (ndx < 0 || ndx >= o1.payload.Count)
+                    if (ndx < 0 || ndx >= deviceConfig.Count)
                         continue;
-                    // add
-                    int i2 = o1.payload[ndx].pid;
-                    pids.Add(i2);
+                    var ffn = deviceConfig[ndx]?.FriendlyName?.Trim();
+                    if (ffn?.HasContent() != true)
+                        continue;
+
+                    // find this friendly name in the players list
+                    for (int pi=0; pi < o1.payload.Count; pi++)
+                    {
+                        var pln = o1.payload[pi]?.name?.ToString().Trim();
+                        if (ffn.Equals(pln, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            int ii = o1.payload[pi].pid;
+                            pids.Add(ii);
+                            break;
+                        }
+                    }
                 }
                 // finally it?
                 if (pids.Count < 1)
                     continue;
                 // do it
                 var pidstr = string.Join(',', pids);
-                var o2 = await device.Telnet.SendCommandAsync($"heos://group/set_group?pid={pidstr}\r\n");
-                if (!HeosTelnet.IsSuccessCode(o2))
+                var o4 = await activeDevice.Telnet.SendCommandAsync($"heos://group/set_group?pid={pidstr}\r\n");
+                if (!HeosTelnet.IsSuccessCode(o4))
                     return false;
             }
 

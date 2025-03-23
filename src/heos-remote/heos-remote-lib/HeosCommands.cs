@@ -11,23 +11,24 @@ namespace heos_remote_lib
     {
         public static async Task<bool> ExecuteSimpleCommand(
             HeosAppOptions options,
-            HeosConnectedItemMgr? ConnMgr,
+            HeosConnectedItemMgr? ConnMgr,            
             HeosDeviceConfig? deviceConfig,
             string cmd,
+            bool androidMode = false,
             Action<int, HeosConnectedItem?>? lambdaSetPidPlayer = null,
-            Action<string>? lambdaMsg = null,
+            Func<string, Task>? lambdaMsg = null,
             Action<HeosDiscoveredItem?, List<Tuple<string, string>>?, string?>? lambdaInfoBox = null)
         {
             // access
             if (options == null || deviceConfig == null || ConnMgr == null || cmd?.HasContent() != true)
                 return false;
-            if (!("Toggle Play Pause Next Prev Fav 1 Fav 2 Fav 3 Aux In SPDIF In HDMI In Vol + Vol - Info Browse".Contains(cmd)))
+            if (!("Toggle Play Pause Next Prev Fav 1 Fav 2 Fav 3 Aux In SPDIF In HDMI In Vol + Vol - Reboot Info Browse".Contains(cmd)))
                 return false;
 
             // any command to the device
 
             // establish device
-            var device = await ConnMgr.DiscoverOrGet(deviceConfig: deviceConfig, debugLevel: 0);
+            var device = await ConnMgr.DiscoverOrGet(deviceConfig: deviceConfig, debugLevel: 0, androidMode: androidMode);
             if (device?.Telnet == null)
             {
                 lambdaMsg?.Invoke("No device found. Aborting!");
@@ -38,7 +39,8 @@ namespace heos_remote_lib
             var o1 = await device.Telnet.SendCommandAsync("heos://player/get_players\r\n");
             if (!HeosTelnet.IsSuccessCode(o1))
             {
-                lambdaMsg?.Invoke("heos://player/get_players returned with no success. Aborting!");
+                if (lambdaMsg != null)
+                    await lambdaMsg.Invoke("heos://player/get_players returned with no success. Aborting!");
                 return false;
             }
 
@@ -51,7 +53,8 @@ namespace heos_remote_lib
 
             if (!pid.HasValue)
             {
-                lambdaMsg?.Invoke("Device not found in players list. Aborting!");
+                if (lambdaMsg != null)
+                    await lambdaMsg.Invoke("Device not found in players list. Aborting!");
                 return false;
             }
 
@@ -63,7 +66,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://player/set_play_state?pid={pid}&state={"pause"}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/set_play_state returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/set_play_state returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -75,7 +79,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://player/set_play_state?pid={pid}&state={"play"}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/set_play_state returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/set_play_state returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -87,7 +92,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://player/get_play_state?pid={pid}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/get_play_state returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/get_play_state returned with no success. Aborting!");
                     return false;
                 }
 
@@ -99,7 +105,8 @@ namespace heos_remote_lib
                 output = await device.Telnet.SendCommandAsync($"heos://player/set_play_state?pid={pid}&state={nextPlayState}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/set_play_state returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/set_play_state returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -111,7 +118,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://player/play_next?pid={pid}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/play_next returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/play_next returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -123,7 +131,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://player/play_previous?pid={pid}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/play_previous returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/play_previous returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -135,7 +144,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://player/volume_up?pid={pid}&step={5}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/volume_up returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/volume_up returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -147,7 +157,22 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://player/volume_down?pid={pid}&step={5}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://player/volume_down returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://player/volume_down returned with no success. Aborting!");
+                    return false;
+                }
+                return true;
+            }
+
+            if (cmd == "Reboot")
+            {
+                // volume down
+                var output = await device.Telnet.SendCommandAsync($"heos://system/reboot\r\n");
+                // waiting makes no sense?!
+                if (false && !HeosTelnet.IsSuccessCode(output))
+                {
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://system/reboot returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -164,7 +189,8 @@ namespace heos_remote_lib
                 if (options.Username?.HasContent() != true
                     || options.Password?.HasContent() != true)
                 {
-                    lambdaMsg?.Invoke("Username/ password of the HEOS account need to be given. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("Username/ password of the HEOS account need to be given. Aborting!");
                     return false;
                 }
 
@@ -172,7 +198,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://system/sign_in?un={options.Username}&pw={options.Password}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://system/sign_in returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://system/sign_in returned with no success. Aborting!");
                     return false;
                 }
 
@@ -180,7 +207,8 @@ namespace heos_remote_lib
                 output = await device.Telnet.SendCommandAsync($"heos://browse/play_preset?pid={pid}&preset={favNdx}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://browse/play_preset returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://browse/play_preset returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -197,7 +225,8 @@ namespace heos_remote_lib
                 var output = await device.Telnet.SendCommandAsync($"heos://browse/play_input?pid={pid}&input={input}\r\n");
                 if (!HeosTelnet.IsSuccessCode(output))
                 {
-                    lambdaMsg?.Invoke("heos://browse/play_input returned with no success. Aborting!");
+                    if (lambdaMsg != null)
+                        await lambdaMsg.Invoke("heos://browse/play_input returned with no success. Aborting!");
                     return false;
                 }
                 return true;
@@ -213,7 +242,8 @@ namespace heos_remote_lib
                     var output = await device.Telnet.SendCommandAsync($"heos://player/get_now_playing_media?pid={pid}\r\n");
                     if (!HeosTelnet.IsSuccessCode(output))
                     {
-                        lambdaMsg?.Invoke("heos://player/get_now_playing_media returned with no success. Aborting!");
+                        if (lambdaMsg != null)
+                            await lambdaMsg.Invoke("heos://player/get_now_playing_media returned with no success. Aborting!");
                         return false;
                     }
 

@@ -6,7 +6,8 @@
   ],
   "Groups": [
     "Single rooms|1|2",
-    "All rooms|1,2"
+    "Dining Room to All|2,1",
+    "Schlafzimmer to All|1,2"
   ],
   // Recommendation: Be careful! If in doubt, set username, Password via commandline options
   // in order to not expose secrets via Github

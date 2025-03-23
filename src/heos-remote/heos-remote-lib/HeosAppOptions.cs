@@ -59,17 +59,37 @@ namespace heos_remote_lib
         /// <summary>
         /// Will read options from a file into the given instance.
         /// </summary>
-        public static void ReadJson(string fn, HeosAppOptions optionsInformation)
+        public static bool ReadJson(string fn, HeosAppOptions optionsInformation)
         {
             try
             {
                 var jsonStr = System.IO.File.ReadAllText(fn);
                 JsonConvert.PopulateObject(jsonStr, optionsInformation);
+                return true;
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine("When reading options JSON file: {0}", ex.Message.ToString());
             }
+            return false;
+        }
+
+        /// <summary>
+        /// Will write options from a file into the given instance.
+        /// </summary>
+        public static bool WriteJson(string fn, HeosAppOptions optionsInformation)
+        {
+            try
+            {
+                var text = JsonConvert.SerializeObject(optionsInformation, Formatting.Indented);
+                System.IO.File.WriteAllText(fn, text);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("When writing options JSON file: {0}", ex.Message.ToString());
+            }
+            return false;
         }
 
         public static HeosDeviceConfig? SplitDeviceName(string? deviceName)

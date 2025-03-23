@@ -132,6 +132,8 @@ namespace heos_remote_systray
                 onClick: contextMenuItemHandler);
             contextMenu.Items.Add("HDMI In", image: WinFormsUtils.ByteToImage(Resources.heos_remote_hdmi_in),
                 onClick: contextMenuItemHandler);
+            contextMenu.Items.Add("Reboot", image: WinFormsUtils.ByteToImage(Resources.heos_remote_reboot),
+                onClick: contextMenuItemHandler);
             contextMenu.Items.Add(new ToolStripSeparator());
             contextMenu.Items.Add("Browse", image: WinFormsUtils.ByteToImage(Resources.heos_remote_browse),
                 onClick: contextMenuItemHandler);
@@ -210,6 +212,14 @@ namespace heos_remote_systray
             int? gotPid = null;
             HeosConnectedItem? gotDevice = null;
 
+            // in case of some commands, we want to check back with the user first
+            if ("Reboot".Contains(cmd))
+            {
+                var askBackResult = MessageBox.Show($"Do you want to execute the command: {cmd} ?", "Confirmation", MessageBoxButtons.YesNo);
+                if (askBackResult != DialogResult.Yes)
+                    return;
+            }
+
             // try directly to refer to library command handling,
             // this will activate some lambdas
             await HeosCommands.ExecuteSimpleCommand(
@@ -221,7 +231,8 @@ namespace heos_remote_systray
                     gotPid = pid; 
                     gotDevice = device;
                 },
-                lambdaMsg: (msg) => {
+                lambdaMsg: async (msg) => {
+                    await Task.Yield();
                     trayIcon.ShowBalloonTip(500, "HEOS Control", msg, ToolTipIcon.Info);
                 },
                 lambdaInfoBox: (dev, nowPlay, imgUrl) => {
@@ -400,7 +411,7 @@ namespace heos_remote_systray
                         return;
 
                     // do it
-                    await _groupConfigs[tsi2.Index].Execute(device);
+                    await _groupConfigs[tsi2.Index].Execute(_deviceConfigs, device, unGroup: true);
                 }
                 return;
             }

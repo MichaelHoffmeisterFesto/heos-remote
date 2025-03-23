@@ -118,52 +118,58 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="heos_remote_aux_in" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_aux_in.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="heos_remote_browse" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_browse.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="heos_remote_fav1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_fav1.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="heos_remote_fav2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_fav2.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="heos_remote_fav3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_fav3.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="heos_remote_hdmi_in" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_hdmi_in.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="heos_remote_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_icon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="heos_remote_icon_I5p_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\heos_remote_icon_I5p_icon.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-play" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-play.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_info" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_info.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-pause" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-pause.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_next" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_next.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-fav1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-fav1.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_pause" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_pause.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-fav2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-fav2.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_play" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_play.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-fav3" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-fav3.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_prev" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_prev.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-vol-down" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-vol-down.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_reboot" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_reboot.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-vol-up" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-vol-up.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_spdif_in" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_spdif_in.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-url" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-url.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_url" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_url.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-prev" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-prev.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_vol_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_vol_down.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="heos-remote-next" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-next.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="heos-remote-spdif-in" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-spdif-in.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="heos-remote-aux-in" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-aux-in.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="heos-remote-hdmi-in" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-hdmi-in.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="heos-remote-browse" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-browse.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="heos-remote-info" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\heos-remote-info.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="heos_remote_vol_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_vol_up.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

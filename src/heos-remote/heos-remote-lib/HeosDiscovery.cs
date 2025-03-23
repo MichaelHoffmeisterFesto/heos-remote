@@ -30,20 +30,24 @@ namespace heos_remote_lib
             string? firstManufacturer = null,
             int debugLevel = 0,
             int timeOutMs = 3000,
-            string? interfaceName = null)
+            string? interfaceName = null,
+            bool androidMode = false)
         {
+            var res = new List<HeosDiscoveredItem>();
             await Task.Yield();
 
             NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
 
-            IPAddress? bestAdr = null;
-
+            var foundAdr = new List<Tuple<NetworkInterface, IPAddress>>();
             foreach (NetworkInterface adapter in nics)
             {
                 // find a working IP4 address
                 IPInterfaceProperties ip_properties = adapter.GetIPProperties();
-                if (!adapter.GetIPProperties().MulticastAddresses.Any())
-                    continue; // most of VPN adapters will be skipped
+                if (!androidMode)
+                {
+                    if (!ip_properties.MulticastAddresses.Any())
+                        continue; // most of VPN adapters will be skipped
+                }
                 if (!adapter.SupportsMulticast)
                     continue; // multicast is meaningless for this type of connection
                 if (OperationalStatus.Up != adapter.OperationalStatus)
@@ -53,29 +57,40 @@ namespace heos_remote_lib
                     continue; // IPv4 is not configured on this adapter
 
                 // get the address itself
-                IPAddress? foundAdr = null;
                 foreach (var a in ip_properties.UnicastAddresses)
                 {
                     // find IP4
                     if (a.Address.AddressFamily != AddressFamily.InterNetwork)
                         continue;
-                    foundAdr = a.Address.MapToIPv4();
+                    var adr = a.Address.MapToIPv4();
+                    foundAdr.Add(new Tuple<NetworkInterface, IPAddress>(adapter, adr));
                 }
-                if (foundAdr == null)
-                    continue;
+            }
 
+            if (foundAdr.Count < 1)
+                return res;
+
+            // find best address
+            IPAddress? bestAdr = foundAdr.FirstOrDefault()?.Item2;
+            foreach (var adr in foundAdr)
+            {
                 // force this?
                 if (interfaceName?.HasContent() == true
-                    && adapter.Name.ToLower().Contains(interfaceName.Trim().ToLower()))
-                    bestAdr = foundAdr;
+                    && adr.Item1.Name.ToLower().Contains(interfaceName.Trim().ToLower()))
+                {
+                    bestAdr = adr.Item2;
+                    break;
+                }
 
-                // set any?
-                if (bestAdr == null)
-                    bestAdr = foundAdr;
+                // cherry pick
+                if (androidMode && adr.Item1.Description?.ToLower().Contains("wlan0") == true)
+                {
+                    bestAdr = adr.Item2;
+                    break;
+                }
             }
 
             // no chance?
-            var res = new List<HeosDiscoveredItem>();
             if (bestAdr == null)
                 return res;
 
@@ -123,7 +138,9 @@ namespace heos_remote_lib
                 var startTime = DateTime.UtcNow;
 
                 // will download XMLs
-                var sharedHttpClient = new HttpClient();
+                var sharedHttpClient = androidMode
+                    ? new HttpClient(new SocketsHttpHandler())
+                    : new HttpClient();
 
                 // collect results
             
