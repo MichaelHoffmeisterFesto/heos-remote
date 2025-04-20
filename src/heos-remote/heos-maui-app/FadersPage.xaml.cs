@@ -110,20 +110,45 @@ public partial class FadersPage : ContentPage
                 VerticalOptions = LayoutOptions.Center
             };
 
-            var vert = new VerticalStackLayout()
+            // for vertical, do a 1x2 grid set to auto/ auto in order to detect the size
+            var lab1 = new Label() { Text = "AAA", FontSize = 14, LineBreakMode = LineBreakMode.NoWrap, FontAttributes = FontAttributes.Bold };
+            var lab2 = new Label() { Text = "BBB", FontSize = 12, LineBreakMode = LineBreakMode.NoWrap };
+
+            Grid.SetRow(lab1, 0); 
+            Grid.SetRow(lab2, 1); 
+
+            var vert2 = new Grid()
             {
-                Children =
+                RowDefinitions =
                 {
-                    new Label() { Text="AAA", FontSize=12, LineBreakMode=LineBreakMode.NoWrap, FontAttributes=FontAttributes.Bold },
-                    new Label() { Text="BBB", FontSize=10, LineBreakMode=LineBreakMode.NoWrap }
+                    new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                    new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
+                },
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }
                 },
                 HorizontalOptions = LayoutOptions.Start,
-                VerticalOptions = LayoutOptions.Center
+                VerticalOptions = LayoutOptions.Start,
+                Children = {
+                    lab1, lab2
+                }
             };
+
+            //var vert = new VerticalStackLayout()
+            //{
+            //    Children =
+            //    {
+            //        new Label() { Text="AAA", FontSize=12, LineBreakMode=LineBreakMode.NoWrap, FontAttributes=FontAttributes.Bold },
+            //        new Label() { Text="BBB", FontSize=10, LineBreakMode=LineBreakMode.NoWrap }
+            //    },
+            //    HorizontalOptions = LayoutOptions.Start,
+            //    VerticalOptions = LayoutOptions.Center
+            //};
 
             var scr = new ScrollView()
             {
-                Content = vert,
+                Content = vert2,
                 Margin = new Thickness(4, 2, 4, 2),
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.FillAndExpand
@@ -216,7 +241,7 @@ public partial class FadersPage : ContentPage
 
                 // text?
                 if (pi.FirstLine?.HasContent() == true
-                    && fi.Scroll.Content is VerticalStackLayout vert
+                    && fi.Scroll.Content is Grid vert
                     && vert.Children.Count >= 2
                     && vert.Children[0] is Label lab1
                     && vert.Children[1] is Label lab2)
@@ -238,23 +263,33 @@ public partial class FadersPage : ContentPage
         }
 
         // detect need of scroll
-        bool needOfScoll = true;
+        double totalDelta = 0;
         foreach (var fad in _faders)
         {
             // not relvant
             if (fad?.Scroll == null || fad?.Image == null
-                || !(fad.Scroll.Content is VerticalStackLayout vert)
+                || !(fad.Scroll.Content is Grid vert)
                 || vert.Children.Count < 2
                 || !(vert.Children[0] is Label lab1)
                 || !(vert.Children[1] is Label lab2))
                 continue;
 
             // larger? .. when image + text are greater than width
-            if (fad.Image.Width + vert.Width > FadersGrid.Width)
-                needOfScoll = true;
+            var delta = Math.Max(lab1.Width, lab2.Width) - FadersGrid.Width;
+            if (delta > 0.0 && delta > totalDelta)
+                totalDelta = delta;
         }
 
-        if (needOfScoll)
-            ;
+        if (totalDelta > 10.0)
+        {
+            foreach (var fad in _faders)
+            {
+                if (fad?.Scroll == null)
+                    continue;
+                // await fad.Scroll.ScrollToAsync(-100, 0, true);
+                await fad.Scroll.TranslateTo(-totalDelta, 0, 500, Easing.Default);
+            }
+
+        }
     }
 }
