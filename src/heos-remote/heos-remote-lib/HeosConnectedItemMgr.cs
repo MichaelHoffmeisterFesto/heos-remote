@@ -98,6 +98,8 @@ namespace heos_remote_lib
             // ok make new item
             var newIt = new HeosConnectedItem(newDi);
             newIt.Telnet = new HeosTelnet(newDi.Host, newDi.Port);
+            if (this.ContainsKey(fn))
+                this.Remove(fn);
             this.Add(fn, newIt);
 
             // return 

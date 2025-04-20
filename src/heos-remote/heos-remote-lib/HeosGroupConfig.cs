@@ -70,7 +70,8 @@ namespace heos_remote_systray
         public async Task<bool> Execute(
             List<HeosDeviceConfig> deviceConfig, 
             HeosConnectedItem activeDevice,
-            bool unGroup = false)
+            bool unGroup = false,
+            Action<int>? setDevIndexAsMaster = null)
         {
             // access
             if (deviceConfig == null || deviceConfig.Count < 1 || activeDevice?.Telnet == null)
@@ -86,7 +87,7 @@ namespace heos_remote_systray
             {
                 // get all groups
                 var o2 = await activeDevice.Telnet.SendCommandAsync("heos://group/get_groups\r\n");
-                if (!HeosTelnet.IsSuccessCode(o1))
+                if (!HeosTelnet.IsSuccessCode(o2))
                     return false;
 
                 // go into that groups
@@ -134,6 +135,10 @@ namespace heos_remote_systray
                     var ffn = deviceConfig[ndx]?.FriendlyName?.Trim();
                     if (ffn?.HasContent() != true)
                         continue;
+
+                    // lambda for finding master index?
+                    if (pids.Count < 1 && setDevIndexAsMaster != null)
+                        setDevIndexAsMaster(ndx);
 
                     // find this friendly name in the players list
                     for (int pi=0; pi < o1.payload.Count; pi++)

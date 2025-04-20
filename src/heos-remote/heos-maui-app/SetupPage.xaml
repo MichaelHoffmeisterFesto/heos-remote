@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="heos_maui_app.SetupPage"
+             Title="SetupPage"
+             Loaded="ContentPage_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+
+        <Editor x:Name="Editor"
+                Grid.Row="0"
+                Grid.Column="0" Grid.ColumnSpan="3"
+                Margin="3"
+                Text="Enter text here"
+                TextColor="Black"
+                BackgroundColor="#d0d0d0"
+                FontSize="11"/>
+
+        <Button x:Name="ButtonReset"
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="3"
+                Text="Reset!"
+                Background="IndianRed"
+                Clicked="Button_Clicked"/>
+
+        <Button x:Name="ButtonCancel"
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="3"
+                Text="Cancel"
+                Clicked="Button_Clicked"/>
+
+        <Button x:Name="ButtonSave"
+                Grid.Row="1"
+                Grid.Column="2"
+                Text="Save"
+                Margin="3"
+                Clicked="Button_Clicked"/>
+    </Grid>
+</ContentPage>

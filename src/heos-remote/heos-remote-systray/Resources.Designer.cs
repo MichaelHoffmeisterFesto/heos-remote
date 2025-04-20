@@ -83,6 +83,16 @@ namespace heos_remote_systray {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
         /// </summary>
+        internal static byte[] heos_remote_faders {
+            get {
+                object obj = ResourceManager.GetObject("heos_remote_faders", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Byte[].
+        /// </summary>
         internal static byte[] heos_remote_fav1 {
             get {
                 object obj = ResourceManager.GetObject("heos_remote_fav1", resourceCulture);

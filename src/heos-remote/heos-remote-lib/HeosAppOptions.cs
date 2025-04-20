@@ -15,6 +15,7 @@ namespace heos_remote_lib
     public class HeosDeviceConfig
     {
         public string FriendlyName = "";
+        public string? Pid = null;
         public IPEndPoint? EndPoint = null;
     }
 
@@ -52,6 +53,9 @@ namespace heos_remote_lib
 
         [Option("cids", HelpText = "Sequence of tuples, which are starting points for containers. Format name|sid|cid." )]
         public IEnumerable<string> StartCids { get; set; } = Enumerable.Empty<string>();
+
+        [Option('f', "faders", Required = false, HelpText = "List of device indices for showing adjustable faders.")]
+        public string Faders { get; set; } = "";
 
         [Option('j', "read-json", Required = false, HelpText = "Path to configuration options in JSON format.")]
         public string? ReadJsonFile { get; set; }

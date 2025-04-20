@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="heos_maui_app.FadersPage"
+             Title="FadersPage"
+             Loaded="ContentPage_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Row="0"
+                Grid.Column="0" StrokeThickness="1.0"
+                Stroke="#AC99EA"
+                Margin="3">
+            
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="4,4,4,4" />
+            </Border.StrokeShape>
+
+            <Grid x:Name="FadersGrid"
+                  Margin="8, 0, 8, 8">
+                
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="4*" />
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                       Text="Diningroom" Margin="0, 20, 0, 0"/>
+                <Slider Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                    Minimum="0"
+                    Maximum="100"/>
+
+                <Image Grid.Row="2" Grid.Column="0" 
+                       Source="dotnet_bot.png"
+                       Aspect="AspectFill"/>
+
+                <ScrollView Grid.Row="2" Grid.Column="1">
+                    <VerticalStackLayout>
+                        <Label Text="Stars Of The Lid" FontSize="18" FontAttributes="Bold"/>
+                        <Label Text="A Meaningful Moment Through a Meaning(less) Process" LineBreakMode="NoWrap"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                       Text="Bedroom" Margin="0, 20, 0, 0"/>
+                <Slider Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                    Minimum="0"
+                    Maximum="100"/>
+
+                <Image Grid.Row="5" Grid.Column="0" 
+                       Source="dotnet_bot.png"
+                       Aspect="AspectFill"/>
+
+                <Label Grid.Row="5" Grid.Column="1" 
+                       HorizontalOptions="Fill"
+                       VerticalOptions="Fill"
+                       HorizontalTextAlignment="Start"
+                       VerticalTextAlignment="Center"
+                       TextType="Text"
+                       Text="Stars Of The Lid A  Meaningful Moment Through a Meaning(less) Process"/>
+            </Grid>
+
+        </Border>
+                     
+        <Button x:Name="ButtonBack"
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="3"
+                Text="Back"
+                Clicked="Button_Clicked"/>
+    </Grid>
+</ContentPage>

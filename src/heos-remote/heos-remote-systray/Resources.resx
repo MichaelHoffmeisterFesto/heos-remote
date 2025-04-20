@@ -124,6 +124,9 @@
   <data name="heos_remote_browse" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\heos_remote_browse.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="heos_remote_faders" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\heos_remote_faders.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="heos_remote_fav1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\heos_remote_fav1.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

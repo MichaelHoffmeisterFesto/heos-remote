@@ -30,17 +30,26 @@ namespace heos_remote_lib
             _port = port;
         }
 
-        public async Task<dynamic> SendCommandAsync(string command)
+        public async Task<dynamic> SendCommandAsync(
+            string command,
+            bool doNotReceive = false,
+            bool readToAnyDelim = false,
+            bool readAnyText = false,
+            int readTimeout = 20000)
         {
             using var client = new TcpClient();
             await client.ConnectAsync(_host, _port);
             using var stream = client.GetStream();
             using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
             using var reader = new StreamReader(stream, Encoding.UTF8);
-            stream.ReadTimeout = 20000;
+            stream.ReadTimeout = readTimeout;
 
             // Send the command
             await writer.WriteLineAsync(command);
+
+            // special case?
+            if (doNotReceive)
+                return "";
 
             // may loop
             while (true)
@@ -50,34 +59,57 @@ namespace heos_remote_lib
                 int braces = 0;
                 try
                 {
-                    while (true || !reader.EndOfStream)
+                    if (readToAnyDelim)
                     {
-                        // get a line
-                        var line = reader.ReadLine();
-                        if (line == null)
-                            break;
-                        if (line.Trim() == "")
-                            continue;
-                        sb.AppendLine(line);
-
-                        // investigate the level of opening and closing braces
-                        // Note: I was not able to figure out another (better) indication, when
-                        // the datagramm was fully received.
-                        foreach (var c in line)
+                        while (!reader.EndOfStream)
                         {
-                            if (c == '{') braces++;
-                            if (c == '}') braces--;
+                            var ch = reader.Read();
+                            if (ch < 0 || ch == '\r' || ch == '\n')
+                                break;
+                            sb.Append((char)ch);
                         }
+                    }
+                    else
+                    {
+                        while (true || !reader.EndOfStream)
+                        {
+                            // get a line
+                            var line = reader.ReadLine();
+                            if (line == null)
+                                break;
+                            if (line.Trim() == "")
+                                continue;
+                            sb.AppendLine(line);
 
-                        // this means: the first non-empty line has to contain a '{', or the
-                        // algo will directly return!!
-                        if (braces == 0)
-                            break;
+                            // investigate the level of opening and closing braces
+                            // Note: I was not able to figure out another (better) indication, when
+                            // the datagramm was fully received.
+                            foreach (var c in line)
+                            {
+                                if (c == '{') braces++;
+                                if (c == '}') braces--;
+                            }
+
+                            // this means: the first non-empty line has to contain a '{', or the
+                            // algo will directly return!!
+                            if (braces == 0)
+                                break;
+                        }
                     }
                 }
-                catch { }
+                catch (Exception ex) {
+                    return new TelnetClientErrorInfo() { ErrorMessage = ex.Message };
+                }
+
                 var response = sb.ToString();
 
+                // return with any text?
+                if (readAnyText)
+                {
+                    return response;
+                }
+
+                // NO, expecting JSON
                 if (!response.StartsWith("{"))
                 {
                     return new TelnetClientErrorInfo() { ErrorMessage = response };

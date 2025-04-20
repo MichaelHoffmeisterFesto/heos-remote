@@ -1,17 +1,14 @@
 ﻿{
   "Devices": [
-    "Diningroom",
-    "Bedroom",
-    "Office-R",
+    "Schlafzimmer",
+    "Dining Room",
     "Office|192.168.178.111"
   ],
   "Groups": [
-    "Single rooms|1|2|3",
-    "Dining Room to All|1,2,3",
-    "Bedroom to All|2,1,3",
-    "Office to All|3,1,2"
+    "Single rooms|1|2",
+    "Dining Room to All|2,1",
+    "Schlafzimmer to All|1,2"
   ],
-  "Faders" : "1,2,3",
   // Recommendation: Be careful! If in doubt, set username, Password via commandline options
   // in order to not expose secrets via Github
   // "Username": "user@example.com",

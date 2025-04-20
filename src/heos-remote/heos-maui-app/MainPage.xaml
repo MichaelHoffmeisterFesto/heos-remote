@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="heos_maui_app.MainPage"
+             Loaded="ContentPage_Loaded"
+             BackgroundColor="White">
+
+    <Grid x:Name="GridOuter">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+
+        <Picker x:Name="DevicePicker"
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="3"
+                VerticalTextAlignment="Center"
+                TextColor="Black"
+                Background="#d0d0d0"
+                SelectedIndexChanged="OnPickerSelectedIndexChanged"/>
+
+        <Picker x:Name="GroupPicker"
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="3"
+                VerticalTextAlignment="Center"
+                TextColor="Black"
+                Background="#d0d0d0"
+                SelectedIndexChanged="OnPickerSelectedIndexChanged"/>
+
+        <Button x:Name="ButtonSetup"
+                Grid.Row="0" Grid.RowSpan="2"
+                Grid.Column="1"
+                ImageSource="gears.png"
+                Background="LightGray"
+                CornerRadius="2"
+                Margin="3"
+                Clicked="Button_Clicked"/>
+
+        <Grid x:Name="ButtonGrid"
+              Grid.Row="2"
+              Grid.Column="0" Grid.ColumnSpan="2">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+        </Grid>
+
+    </Grid>
+    
+    <!--
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+            <Image
+                Source="dotnet_bot.png"
+                HeightRequest="185"
+                Aspect="AspectFit"
+                SemanticProperties.Description="dot net bot in a hovercraft number nine" />
+
+            <Label
+                Text="Hello, World!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <Label
+                Text="Welcome to &#10;.NET Multi-platform App UI"
+                Style="{StaticResource SubHeadline}"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+    -->
+
+</ContentPage>
