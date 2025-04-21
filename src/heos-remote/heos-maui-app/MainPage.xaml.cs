@@ -215,50 +215,62 @@ namespace heos_maui_app
             int? gotPid = null;
             HeosConnectedItem? gotDevice = null;
 
-            // in case of some commands, we want to check back with the user first
-            if ("Reboot".Contains(cmd))
+            // be safe 
+            try
             {
-                bool askBackResult = await DisplayAlert("Confirmation", $"Do you want to execute the command: {cmd} ?", "Yes", "No");
-                if (askBackResult != true)
+
+                // in case of some commands, we want to check back with the user first
+                if ("Reboot".Contains(cmd))
+                {
+                    bool askBackResult = await DisplayAlert("Confirmation", $"Do you want to execute the command: {cmd} ?", "Yes", "No");
+                    if (askBackResult != true)
+                        return;
+                }
+
+                if ("Faders".Contains(cmd))
+                {
+                    await Button_Special_Clicked(cmd);
                     return;
-            }
-
-            if ("Faders".Contains(cmd))
-            {
-                await Button_Special_Clicked(cmd);
-                return;
-            }
-
-            // try directly to refer to library command handling,
-            // this will activate some lambdas
-            await HeosCommands.ExecuteSimpleCommand(
-                options: Options.Curr,
-                ConnMgr: _connMgr,
-                deviceConfig: _activeDevice,
-                cmd: cmd,
-                androidMode: _androidMode,
-                interfaceName: Options.Curr.IfcName,
-                lambdaSetPidPlayer: (pid, device) => {
-                    gotPid = pid;
-                    gotDevice = device;
-                },
-                lambdaMsg: async (msg) => {
-                    await MauiUiHelper.ShowToast(msg);
-                },
-                lambdaInfoBox: (dev, nowPlay, imgUrl) => {
-                    ;
-                });
-
-            // further commands possible?
-            if (gotPid.HasValue && gotDevice?.Telnet != null)
-            {
-                if (cmd == "Browse")
-                {
                 }
 
-                if (cmd == "Play URL")
+                // try directly to refer to library command handling,
+                // this will activate some lambdas
+                await HeosCommands.ExecuteSimpleCommand(
+                    options: Options.Curr,
+                    ConnMgr: _connMgr,
+                    deviceConfig: _activeDevice,
+                    cmd: cmd,
+                    androidMode: _androidMode,
+                    interfaceName: Options.Curr.IfcName,
+                    lambdaSetPidPlayer: (pid, device) =>
+                    {
+                        gotPid = pid;
+                        gotDevice = device;
+                    },
+                    lambdaMsg: async (msg) =>
+                    {
+                        await MauiUiHelper.ShowToast(msg);
+                    },
+                    lambdaInfoBox: (dev, nowPlay, imgUrl) =>
+                    {
+                        ;
+                    });
+
+                // further commands possible?
+                if (gotPid.HasValue && gotDevice?.Telnet != null)
                 {
+                    if (cmd == "Browse")
+                    {
+                    }
+
+                    if (cmd == "Play URL")
+                    {
+                    }
                 }
+            } 
+            catch (Exception ex)
+            {
+                await MauiUiHelper.ShowToast($"Executing command {cmd} gave exception: {ex.Message} in {ex.StackTrace}");
             }
         }
 
@@ -383,6 +395,54 @@ namespace heos_maui_app
                                     });
 
                         return pi;
+                    },
+                    lambdaFunctionSelected: async (dev,tag) =>
+                    {
+                        await Task.Yield();
+
+                        if (dev != null && tag is string cmd 
+                            && cmd.HasContent() == true && "Play Pause Prev Next".Contains(cmd))
+                        {
+                            // be safe 
+                            try
+                            {
+                                // try directly to refer to library command handling,
+                                // this will activate some lambdas
+                                await HeosCommands.ExecuteSimpleCommand(
+                                    options: Options.Curr,
+                                    ConnMgr: _connMgr,
+                                    deviceConfig: dev,
+                                    cmd: cmd,
+                                    androidMode: _androidMode,
+                                    interfaceName: Options.Curr.IfcName,
+                                    lambdaMsg: async (msg) =>
+                                    {
+                                        await MauiUiHelper.ShowToast(msg);
+                                    });
+                            }
+                            catch (Exception ex)
+                            {
+                                await MauiUiHelper.ShowToast($"Executing command {cmd} gave exception: {ex.Message} in {ex.StackTrace}");
+                            }
+                        }
+
+                        if (tag as string == "Select")
+                        {
+                            // find device id
+                            int foundDi = -1;
+                            foreach (var d in _deviceConfigs)
+                                if (d.FriendlyName.Equals(dev?.FriendlyName ?? "", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    foundDi = _deviceConfigs.IndexOf(d);
+                                    break;
+                                }
+                            if (foundDi < 0)
+                                return;
+
+                            // select on picker .. will do the rest
+                            if (foundDi < DevicePicker.Items.Count)
+                                DevicePicker.SelectedIndex = foundDi;
+                        }
                     });
 
                 fadersPage.Disappearing += async (s2, e2) => {

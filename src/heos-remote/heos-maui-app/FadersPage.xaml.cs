@@ -3,6 +3,7 @@ using heos_remote_lib;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Handlers;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace heos_maui_app;
@@ -32,6 +33,7 @@ public partial class FadersPage : ContentPage
     protected Func<HeosDeviceConfig, Task<double?>>? _faderGetVolume = null;
     protected Func<HeosDeviceConfig, double, Task<bool>>? _faderSetVolume = null;
     protected Func<HeosDeviceConfig, Task<HeosPlayingInfo?>>? _faderGetInfo = null;
+    protected Func<HeosDeviceConfig, object, Task>? _lambdaFunctionSelected = null;
 
     protected bool _goValueChanges = true;
 
@@ -44,7 +46,8 @@ public partial class FadersPage : ContentPage
         List<int> faderIndices,
         Func<HeosDeviceConfig, Task<double?>>? faderGetVolume = null,
         Func<HeosDeviceConfig, double, Task<bool>>? faderSetVolume = null,
-        Func<HeosDeviceConfig, Task<HeosPlayingInfo?>>? faderGetInfo = null)
+        Func<HeosDeviceConfig, Task<HeosPlayingInfo?>>? faderGetInfo = null,
+        Func<HeosDeviceConfig, object, Task>? lambdaFunctionSelected = null)
 	{
         _faders = new ();
         foreach (var i in faderIndices)
@@ -58,6 +61,7 @@ public partial class FadersPage : ContentPage
         _faderGetVolume = faderGetVolume;
         _faderSetVolume = faderSetVolume;
         _faderGetInfo = faderGetInfo;
+        _lambdaFunctionSelected = lambdaFunctionSelected;
         InitializeComponent();
 	}
 
@@ -132,76 +136,42 @@ public partial class FadersPage : ContentPage
                 Content = vert,
                 Margin = new Thickness(4, 2, 4, 2),
                 VerticalOptions = LayoutOptions.Center,
-                HorizontalOptions = LayoutOptions.FillAndExpand
+                HorizontalOptions = LayoutOptions.Fill
             };
 
             var btn = new Button() { 
-                FontSize = 16,
-                Text = "\u22ee"
+                FontSize = 18,
+                Text = ">",
+                BorderColor = Colors.Gray,
+                BorderWidth = 1.5,
+                TextColor = Colors.Gray,
+                Background = Colors.Transparent,
             };
 
             btn.Clicked += async (s, e) =>
             {
-                var exit = new Button() { 
-                    Text = "Exit",
-                    Margin = new Thickness(3),
-                };
-                exit.Clicked += async (s, e) =>
-                {
-                    if (_myPopup != null)
+                var contextMenuPage = new ContextMenuPage(
+                    $"Select action for: {thisFader.Config.FriendlyName}",
+                    new[] { 
+                        new ContextMenuItem() { Title = "Play", ImageUrl = "heos_remote_play.png", Tag="Play" },
+                        new ContextMenuItem() { Title = "Pause", ImageUrl = "heos_remote_pause.png", Tag="Pause" },
+                        new ContextMenuItem() { Title = "Prev", ImageUrl = "heos_remote_prev.png", Tag="Prev" },
+                        new ContextMenuItem() { Title = "Next", ImageUrl = "heos_remote_next.png", Tag="Next" },
+                        new ContextMenuItem() { Title = "Select", ImageUrl = "heos_remote_select.png", Tag="Select", ClosePage = true },
+                    });
+                contextMenuPage.Disappearing += async (s2, e2) => {
+                    if (contextMenuPage.Result && contextMenuPage.ResultItem?.Tag != null)
                     {
-                        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                        await _myPopup.CloseAsync(true, cts.Token);
-                    }
-                };
-
-                _myPopup = new Popup
-                {
-                    Color = Colors.Transparent,
-                    CanBeDismissedByTappingOutsideOfPopup = false,
-                    Content = new Border()
-                    {
-                        BackgroundColor = Colors.Black,
-                        StrokeShape = new RoundRectangle() { CornerRadius = new CornerRadius(8) },
-                        Content = new VerticalStackLayout
+                        if (_lambdaFunctionSelected != null)
+                            await _lambdaFunctionSelected(thisFader.Config, contextMenuPage.ResultItem.Tag);
+                        if (contextMenuPage.ResultItem.ClosePage)
                         {
-                            Margin = new Thickness(8),
-                            Children =
-                            {
-                                new Label
-                                {
-                                    Text = "This is a very important message!",
-                                    Margin = new Thickness(2, 10, 2, 10)
-                                },
-                                new Button
-                                {
-                                    Text = "Play",
-                                    Margin = new Thickness(3),
-                                },
-                                new Button
-                                {
-                                    Text = "Pause",
-                                    Margin = new Thickness(3),
-                                },
-                                exit
-                            }
+                            Result = true;
+                            await Navigation.PopModalAsync();
                         }
                     }
                 };
-
-                var result = await this.ShowPopupAsync(_myPopup, CancellationToken.None);
-
-                if (result is bool boolResult)
-                {
-                    if (boolResult)
-                    {
-                        // Yes was tapped
-                    }
-                    else
-                    {
-                        // No was tapped
-                    }
-                }
+                await Navigation.PushModalAsync(contextMenuPage);
             };
 
             Grid.SetRow(lab, 3 * i);     Grid.SetColumn(lab, 0); Grid.SetColumnSpan(lab, 3);
@@ -250,8 +220,16 @@ public partial class FadersPage : ContentPage
             // Important: get fader
             if (_faderGetVolume == null || fi.Slider == null)
                 return;
-
-            var vol = await _faderGetVolume(fi.Config);
+            double? vol = null;
+            try
+            {
+                vol = await _faderGetVolume(fi.Config);
+            }
+            catch 
+            {
+                // in any case, silently ignore
+                return;
+            }
 
             if (vol.HasValue)
                 MainThread.BeginInvokeOnMainThread(() =>
@@ -266,7 +244,15 @@ public partial class FadersPage : ContentPage
             if (_faderGetInfo == null || fi.Image == null || fi.Scroll == null)
                 return;
 
-            var pi = await _faderGetInfo(fi.Config);
+            HeosPlayingInfo? pi = null;
+            try { 
+                pi = await _faderGetInfo(fi.Config);
+            }
+            catch
+            {
+                // in any case, silently ignore
+                return;
+            }
             if (pi == null)
                 return;
 

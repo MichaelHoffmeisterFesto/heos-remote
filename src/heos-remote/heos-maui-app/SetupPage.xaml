@@ -23,7 +23,7 @@
                 Text="Enter text here"
                 TextColor="Black"
                 BackgroundColor="#d0d0d0"
-                FontSize="11"/>
+                FontSize="12"/>
 
         <Button x:Name="ButtonReset"
                 Grid.Row="1"

@@ -39,7 +39,7 @@ namespace heos_remote_lib
         [Option('v', "verbosity", Required = false, HelpText = "Verbosity level >= 0.")]
         public int Verbose { get; set; } = 0;
 
-        [Option('t', "time-out", Required = false, HelpText = "Time-out in [ms].")]
+        [Option("time-out", Required = false, HelpText = "Time-out in [ms].")]
         public int TimeOut { get; set; } = 3000;
 
         [Option('u', "username", Required = false, HelpText = "Username of the HEOS account (cleartext).")]
@@ -59,6 +59,9 @@ namespace heos_remote_lib
 
         [Option('j', "read-json", Required = false, HelpText = "Path to configuration options in JSON format.")]
         public string? ReadJsonFile { get; set; }
+
+        [Option('t', "test", Required = false, HelpText = "Test function index.")]
+        public int Test { get; set; } = 0;
 
         /// <summary>
         /// Will read options from a file into the given instance.
