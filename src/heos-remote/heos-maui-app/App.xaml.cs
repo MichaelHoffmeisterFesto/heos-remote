@@ -5,6 +5,15 @@
         public App()
         {
             InitializeComponent();
+
+            AppDomain.CurrentDomain.UnhandledException += async (s, e) =>
+            {
+                await MauiUiHelper.ShowToast("AppDomain");
+            };
+            TaskScheduler.UnobservedTaskException += async (s, e) =>
+            {
+                await MauiUiHelper.ShowToast("TaskScheduler");
+            };
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

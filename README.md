@@ -129,4 +129,16 @@ The following music services were tested:
 | Music service | SID | Status |
 | ------------- | --- | ------ |
 | TuneIn        | 3   | Working with free account |
+| Spotify       | 4   | Working with paid account |
 | Amazon music  | 13  | Working with paid account |
+
+## Notes
+
+* Compile and install as APK
+  https://stackoverflow.com/questions/77283547/maui-app-how-to-install-on-android-phone-with-apk-file
+
+  gives 
+  ```
+  dotnet publish -c Release -r android-arm64 -p:PackageFormat=Apk -f net7.0-android --sc true
+  ```
+

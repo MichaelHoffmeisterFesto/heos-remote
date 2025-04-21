@@ -1,4 +1,8 @@
+using CommunityToolkit.Maui.Views;
 using heos_remote_lib;
+using Microsoft.Maui.Controls.PlatformConfiguration;
+using Microsoft.Maui.Controls.Shapes;
+using Microsoft.Maui.Handlers;
 using System.Collections.Generic;
 
 namespace heos_maui_app;
@@ -57,6 +61,8 @@ public partial class FadersPage : ContentPage
         InitializeComponent();
 	}
 
+    protected Popup? _myPopup = null;
+
     private async void ContentPage_Loaded(object sender, EventArgs e)
     {
         await Task.Yield();
@@ -110,59 +116,105 @@ public partial class FadersPage : ContentPage
                 VerticalOptions = LayoutOptions.Center
             };
 
-            // for vertical, do a 1x2 grid set to auto/ auto in order to detect the size
-            var lab1 = new Label() { Text = "AAA", FontSize = 14, LineBreakMode = LineBreakMode.NoWrap, FontAttributes = FontAttributes.Bold };
-            var lab2 = new Label() { Text = "BBB", FontSize = 12, LineBreakMode = LineBreakMode.NoWrap };
-
-            Grid.SetRow(lab1, 0); 
-            Grid.SetRow(lab2, 1); 
-
-            var vert2 = new Grid()
+            var vert = new VerticalStackLayout()
             {
-                RowDefinitions =
+                Children =
                 {
-                    new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                    new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
-                },
-                ColumnDefinitions =
-                {
-                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }
+                    new Label() { Text="AAA", FontSize=12, LineBreakMode=LineBreakMode.NoWrap, FontAttributes=FontAttributes.Bold },
+                    new Label() { Text="BBB", FontSize=10, LineBreakMode=LineBreakMode.NoWrap }
                 },
                 HorizontalOptions = LayoutOptions.Start,
-                VerticalOptions = LayoutOptions.Start,
-                Children = {
-                    lab1, lab2
-                }
+                VerticalOptions = LayoutOptions.Center
             };
-
-            //var vert = new VerticalStackLayout()
-            //{
-            //    Children =
-            //    {
-            //        new Label() { Text="AAA", FontSize=12, LineBreakMode=LineBreakMode.NoWrap, FontAttributes=FontAttributes.Bold },
-            //        new Label() { Text="BBB", FontSize=10, LineBreakMode=LineBreakMode.NoWrap }
-            //    },
-            //    HorizontalOptions = LayoutOptions.Start,
-            //    VerticalOptions = LayoutOptions.Center
-            //};
 
             var scr = new ScrollView()
             {
-                Content = vert2,
+                Content = vert,
                 Margin = new Thickness(4, 2, 4, 2),
                 VerticalOptions = LayoutOptions.Center,
                 HorizontalOptions = LayoutOptions.FillAndExpand
             };
 
-            Grid.SetRow(lab, 3 * i);     Grid.SetColumn(lab, 0); Grid.SetColumnSpan(lab, 2);
-            Grid.SetRow(sld, 3 * i + 1); Grid.SetColumn(sld, 0); Grid.SetColumnSpan(sld, 2);
+            var btn = new Button() { 
+                FontSize = 16,
+                Text = "\u22ee"
+            };
+
+            btn.Clicked += async (s, e) =>
+            {
+                var exit = new Button() { 
+                    Text = "Exit",
+                    Margin = new Thickness(3),
+                };
+                exit.Clicked += async (s, e) =>
+                {
+                    if (_myPopup != null)
+                    {
+                        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                        await _myPopup.CloseAsync(true, cts.Token);
+                    }
+                };
+
+                _myPopup = new Popup
+                {
+                    Color = Colors.Transparent,
+                    CanBeDismissedByTappingOutsideOfPopup = false,
+                    Content = new Border()
+                    {
+                        BackgroundColor = Colors.Black,
+                        StrokeShape = new RoundRectangle() { CornerRadius = new CornerRadius(8) },
+                        Content = new VerticalStackLayout
+                        {
+                            Margin = new Thickness(8),
+                            Children =
+                            {
+                                new Label
+                                {
+                                    Text = "This is a very important message!",
+                                    Margin = new Thickness(2, 10, 2, 10)
+                                },
+                                new Button
+                                {
+                                    Text = "Play",
+                                    Margin = new Thickness(3),
+                                },
+                                new Button
+                                {
+                                    Text = "Pause",
+                                    Margin = new Thickness(3),
+                                },
+                                exit
+                            }
+                        }
+                    }
+                };
+
+                var result = await this.ShowPopupAsync(_myPopup, CancellationToken.None);
+
+                if (result is bool boolResult)
+                {
+                    if (boolResult)
+                    {
+                        // Yes was tapped
+                    }
+                    else
+                    {
+                        // No was tapped
+                    }
+                }
+            };
+
+            Grid.SetRow(lab, 3 * i);     Grid.SetColumn(lab, 0); Grid.SetColumnSpan(lab, 3);
+            Grid.SetRow(sld, 3 * i + 1); Grid.SetColumn(sld, 0); Grid.SetColumnSpan(sld, 3);
             Grid.SetRow(img, 3 * i + 2); Grid.SetColumn(img, 0);
             Grid.SetRow(scr, 3 * i + 2); Grid.SetColumn(scr, 1);
+            Grid.SetRow(btn, 3 * i + 2); Grid.SetColumn(btn, 2);
 
             FadersGrid.Children.Add(lab);
             FadersGrid.Children.Add(sld);
             FadersGrid.Children.Add(img);
             FadersGrid.Children.Add(scr);
+            FadersGrid.Children.Add(btn);
 
             _faders[i].Slider = sld;    
             _faders[i].Image = img;    
@@ -241,7 +293,7 @@ public partial class FadersPage : ContentPage
 
                 // text?
                 if (pi.FirstLine?.HasContent() == true
-                    && fi.Scroll.Content is Grid vert
+                    && fi.Scroll.Content is VerticalStackLayout vert
                     && vert.Children.Count >= 2
                     && vert.Children[0] is Label lab1
                     && vert.Children[1] is Label lab2)
@@ -260,36 +312,6 @@ public partial class FadersPage : ContentPage
         if ((DateTime.UtcNow - _lastSliderUpdate).TotalMilliseconds > 2000)
         {
             await UpdateInfos();
-        }
-
-        // detect need of scroll
-        double totalDelta = 0;
-        foreach (var fad in _faders)
-        {
-            // not relvant
-            if (fad?.Scroll == null || fad?.Image == null
-                || !(fad.Scroll.Content is Grid vert)
-                || vert.Children.Count < 2
-                || !(vert.Children[0] is Label lab1)
-                || !(vert.Children[1] is Label lab2))
-                continue;
-
-            // larger? .. when image + text are greater than width
-            var delta = Math.Max(lab1.Width, lab2.Width) - FadersGrid.Width;
-            if (delta > 0.0 && delta > totalDelta)
-                totalDelta = delta;
-        }
-
-        if (totalDelta > 10.0)
-        {
-            foreach (var fad in _faders)
-            {
-                if (fad?.Scroll == null)
-                    continue;
-                // await fad.Scroll.ScrollToAsync(-100, 0, true);
-                await fad.Scroll.TranslateTo(-totalDelta, 0, 500, Easing.Default);
-            }
-
         }
     }
 }
